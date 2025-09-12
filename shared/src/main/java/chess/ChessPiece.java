@@ -2,7 +2,6 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Represents a single chess piece
@@ -54,13 +53,17 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ChessPiece piece = board.getPiece(myPosition);
-        if (piece.getPieceType() == PieceType.BISHOP) {
-            // return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1,8), null));
-            int[][] options = {{1, 1}, {-1, 1}, {1, -1}, {-1,-1}};
+        PieceMovesCalculator calc = new PieceMovesCalculator();
+        return calc.getMoves(board,myPosition);
+    }
+
+    public class PieceMovesCalculator {
+        public Collection<ChessMove> getMoves(ChessBoard board, ChessPosition myPosition) {
+            ChessPiece piece = board.getPiece(myPosition);
+            int[][] directions = getDirections(piece);
             ArrayList<ChessMove> moves = new ArrayList<>();
 
-            for(int[] i : options) {
+            for(int[] i : directions) {
                 int dx = i[0];
                 int dy = i[1];
                 int row = myPosition.getRow() + dx;
@@ -72,35 +75,29 @@ public class ChessPiece {
                     moves.add(new ChessMove(myPosition, newPosition, null));
                     row += dx;
                     col += dy;
-                    }
-            }
-
-            return moves;
-        }
-        if (piece.getPieceType() == PieceType.ROOK) {
-            // return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1,8), null));
-            int[][] options = {{0, 1}, {0, -1}, {1, 0}, {-1,0}};
-            ArrayList<ChessMove> moves = new ArrayList<>();
-
-            for(int[] i : options) {
-                int dx = i[0];
-                int dy = i[1];
-                int row = myPosition.getRow() + dx;
-                int col = myPosition.getColumn() + dy;
-
-                while(isOnBoard(row, col)) {
-                    ChessPosition newPosition = new ChessPosition(row, col);
-                    moves.add(new ChessMove(myPosition, newPosition, null));
-                    row += dx;
-                    col += dy;
                 }
             }
 
             return moves;
         }
-
-        return List.of();
     }
+
+    private static int[][] getDirections(ChessPiece piece) {
+        int[][] directions;
+        if (piece.getPieceType() == PieceType.BISHOP) {
+            directions = new int[][] {{1,1}, {-1,1}, {1,-1}, {-1,-1}};
+        } else if (piece.getPieceType() == PieceType.ROOK) {
+            directions = new int[][] {{0,1}, {0,-1}, {1,0}, {-1,0}};
+        } else if (piece.getPieceType() == PieceType.QUEEN) {
+            directions = new int[][] {{0,1}, {1,1}, {0, -1}, {-1,1}, {1,0}, {1,-1}, {-1,0}, {-1,-1}};
+        } else if (piece.getPieceType() == PieceType.KING) {
+            directions = new int[][] {{0,1}, {1,1}, {0, -1}, {-1,1}, {1,0}, {1,-1}, {-1,0}, {-1,-1}};
+        } else {
+            directions = new int[0][0];
+        }
+        return directions;
+    }
+
     private boolean isOnBoard(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
