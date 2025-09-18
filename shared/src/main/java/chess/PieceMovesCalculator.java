@@ -14,10 +14,9 @@ import java.util.Collection;
 public class PieceMovesCalculator {
     public Collection<ChessMove> getMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
-        // int[][] directions = getDirections(piece);
-        PieceDirections pd = getDirections(piece);
-        int[][] directions = pd.Directions;
-        boolean slider = pd.Slider;
+        PieceMovement pm = PieceMovement.valueOf(piece.getPieceType().name());
+        int[][] directions = pm.directions;
+        boolean slider = pm.slider;
         ArrayList<ChessMove> moves = new ArrayList<>();
 
         for(int[] i : directions) {
@@ -27,28 +26,17 @@ public class PieceMovesCalculator {
             int col = myPosition.getColumn() + dy;
 
             while(isOnBoard(row, col)) {
-                // System.out.println(String.format("%d, %d -- dx: %d, dy: %d", row, col, dx, dy));
                 ChessPosition newPosition = new ChessPosition(row, col);
-                moves.add(new ChessMove(myPosition, newPosition, null));
-                if (!slider) break;
+                if (emptySquare(board, row, col)) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                }
+                if (!slider) break; //Knight and King don't move continuously
+
                 row += dx;
                 col += dy;
             }
         }
-
         return moves;
-    }
-
-
-    // Class for specific info needed for individual pieces (where they can move, can they slide, etc)
-    public static class PieceDirections {
-        public final int[][] Directions;
-        public final boolean Slider;
-
-        public PieceDirections(int[][] Directions, boolean Slider) {
-            this.Directions = Directions;
-            this.Slider = Slider;
-        }
     }
 
     public enum PieceMovement {
@@ -68,13 +56,12 @@ public class PieceMovesCalculator {
         }
     }
 
-    // Breakdown for specific pieces
-    private static PieceDirections getDirections(ChessPiece piece) {
-        PieceMovement pm = PieceMovement.valueOf(piece.getPieceType().name());
-        return new PieceDirections(pm.directions, pm.slider);
-    }
-
     private boolean isOnBoard(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
+    }
+
+    private boolean emptySquare(ChessBoard board, int row, int col) {
+        ChessPosition position = new ChessPosition(row, col);
+        return board.getPiece(position) == null;
     }
 }
