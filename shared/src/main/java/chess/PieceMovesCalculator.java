@@ -73,7 +73,6 @@ public class PieceMovesCalculator {
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         int pawnDirection;
-        ChessPiece.PieceType promote = null;
         int promotionRow;
 
         // real proud of these :)
