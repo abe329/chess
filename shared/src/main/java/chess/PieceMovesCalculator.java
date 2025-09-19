@@ -73,13 +73,17 @@ public class PieceMovesCalculator {
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         int pawnDirection;
-        // real proud of this one :)
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) pawnDirection= 1; else { pawnDirection= -1; }
+        ChessPiece.PieceType promote = null;
+        int promotionRow;
+
+        // real proud of these :)
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) promotionRow= 8; else { promotionRow = 1; }
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) pawnDirection = 1; else { pawnDirection= -1; }
         int pawnRow = row + pawnDirection;
 
         if (isOnBoard(pawnRow, col) && board.getPiece(new ChessPosition(pawnRow, col)) == null) {
             // Base move
-            moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, col), null));
+            addPawnMove(myPosition, pawnRow, col, promotionRow, moves);
             if (piece.getTeamColor() == ChessGame.TeamColor.WHITE && row == 2 || (piece.getTeamColor() == ChessGame.TeamColor.BLACK && row == 7)) {
                 // Initial 2 square move
                 if (board.getPiece(new ChessPosition(pawnRow + pawnDirection, col)) == null) {
@@ -87,17 +91,29 @@ public class PieceMovesCalculator {
                 }
             }
         }
+        // capture pieces
         int[] captureColumns = {col - 1, col + 1};
         for (int cCol : captureColumns) {
             if(isOnBoard(pawnRow, cCol)) {
                 ChessPiece target = board.getPiece(new ChessPosition(pawnRow, cCol));
                 if(target != null && target.getTeamColor() != piece.getTeamColor()) {
-                    moves.add(new ChessMove(myPosition,new ChessPosition(pawnRow, cCol), null));
+                    addPawnMove(myPosition, pawnRow, cCol, promotionRow, moves);
                 }
             }
         }
-
         return moves;
+    }
+
+    private void addPawnMove(ChessPosition from, int row, int col, int promotionRow, ArrayList<ChessMove> moves) {
+        ChessPosition to= new ChessPosition(row, col);
+        if (row == promotionRow) {
+            moves.add(new ChessMove(from, to, ChessPiece.PieceType.QUEEN));
+            moves.add(new ChessMove(from, to, ChessPiece.PieceType.ROOK));
+            moves.add(new ChessMove(from, to, ChessPiece.PieceType.BISHOP));
+            moves.add(new ChessMove(from, to, ChessPiece.PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(from, to, null));
+        }
     }
 
     private boolean isOnBoard(int row, int col) {
