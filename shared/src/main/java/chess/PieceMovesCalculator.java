@@ -104,7 +104,7 @@ public class PieceMovesCalculator {
     }
 
     private void addPawnMove(ChessPosition from, int row, int col, int promotionRow, ArrayList<ChessMove> moves) {
-        ChessPosition to= new ChessPosition(row, col);
+        ChessPosition to = new ChessPosition(row, col);
         if (row == promotionRow) {
             moves.add(new ChessMove(from, to, ChessPiece.PieceType.QUEEN));
             moves.add(new ChessMove(from, to, ChessPiece.PieceType.ROOK));
