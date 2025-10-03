@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -51,9 +53,16 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        // ChessBoard board = getBoard();
         ChessPiece piece = board.getPiece(startPosition);
-        return piece.pieceMoves(board, startPosition);
+        if (piece == null) return Collections.emptyList();
+
+        Collection<ChessMove> allMoves = piece.pieceMoves(board, startPosition);
+        Collection<ChessMove> legalMoves = new ArrayList<>();
+
+        for (ChessMove move : allMoves) {
+            legalMoves.add(move);
+        }
+        return legalMoves;
     }
 
     /**
