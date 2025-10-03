@@ -81,11 +81,20 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition start = move.getStartPosition();
+        ChessPiece piece = board.getPiece(start);
+        if (piece == null) {
+            throw new InvalidMoveException("No piece at start position.");
+        }
+
+        if (piece.getTeamColor() != team) {
+            throw new InvalidMoveException("Not your turn.");
+        }
+
         if (validMoves(start).contains(move)) {
             board.movePiece(move);
             switchTeam();
         } else {
-            throw new InvalidMoveException("That move isn't valid!");
+            throw new InvalidMoveException("That move isn't valid.");
         }
     }
 
@@ -106,7 +115,7 @@ public class ChessGame {
                     Collection<ChessMove> moves = piece.pieceMoves(board, pos);
 
                     for (ChessMove move : moves) {
-                        if (move.getEndPosition().equals(KingPos)) { //AHHH the whole point of changing equals was to not have this problem.
+                        if (move.getEndPosition().equals(KingPos)) { // AHHH the whole point of changing equals was to not have this problem.
                             return true;
                         }
                     }
@@ -124,8 +133,32 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         ChessPosition KingPos = findKing(teamColor);
+        boolean killToEscape = false;
         Collection<ChessMove> canHeMove = validMoves(KingPos);
-        return isInCheck(teamColor) && canHeMove.isEmpty();
+        Collection<ChessMove> anyMoves = new ArrayList<>();
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition pos = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(pos);
+                if (piece == null) continue;
+                if (piece.getTeamColor().equals(teamColor)) {
+                    anyMoves.addAll(validMoves(pos));
+                }
+                for (ChessMove move : anyMoves) {
+                    ChessBoard copy = new ChessBoard(board);
+                    copy.movePiece(move);
+
+                    ChessGame tempGame = new ChessGame();
+                    tempGame.setBoard(copy);
+
+                    if (!tempGame.isInCheck(teamColor)) {
+                        killToEscape = true;
+                    }
+                }
+            }
+        }
+
+        return isInCheck(teamColor) && canHeMove.isEmpty() && !killToEscape;
     }
 
     /**
