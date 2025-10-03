@@ -57,7 +57,7 @@ public class ChessBoard {
         ChessPosition end = move.getEndPosition();
         squares[start.getRow() - 1][start.getColumn() - 1] = null;
         squares[end.getRow() - 1][end.getColumn() - 1] = piece;
-        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece() != null) { //actually change pawns :)
             squares[end.getRow() - 1][end.getColumn() - 1] = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
         }
     }
