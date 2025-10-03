@@ -79,6 +79,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+        ChessPosition KingPos = findKing(teamColor);
         return false;
     }
 
@@ -122,7 +123,25 @@ public class ChessGame {
     }
 
     private void switchTeam() {
-        if (team == TeamColor.WHITE) team = TeamColor.BLACK; else { team = TeamColor.WHITE ; }
+        if (team == TeamColor.WHITE) team = TeamColor.BLACK;
+        else {
+            team = TeamColor.WHITE;
+        }
+    }
+
+    private ChessPosition findKing(TeamColor teamColor) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition pos = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(pos);
+                if (piece == null) continue;
+
+                if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
+                    return new ChessPosition(i, j);
+                }
+            }
+        }
+        return null;
     }
 
     @Override

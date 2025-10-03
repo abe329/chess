@@ -40,9 +40,12 @@ public class ChessBoard {
     public void movePiece(ChessMove move, ChessBoard board) {
         ChessPosition start = move.getStartPosition();
         ChessPiece piece = board.getPiece(start);
+        if (piece == null) {
+            throw new IllegalArgumentException("No piece at start position: " + start);
+        }
         ChessPosition end = move.getEndPosition();
         squares[start.getRow() - 1][start.getColumn() - 1] = null;
-        squares[end.getRow()][end.getColumn()] = piece;
+        squares[end.getRow() - 1][end.getColumn() - 1] = piece;
     }
 
     /**
