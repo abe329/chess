@@ -60,7 +60,15 @@ public class ChessGame {
         Collection<ChessMove> legalMoves = new ArrayList<>();
 
         for (ChessMove move : allMoves) {
-            legalMoves.add(move);
+            ChessBoard copy = new ChessBoard(board);
+            copy.movePiece(move);
+
+            ChessGame tempGame = new ChessGame();
+            tempGame.setBoard(copy);
+
+            if (!tempGame.isInCheck(piece.getTeamColor())) {
+                legalMoves.add(move);
+            }
         }
         return legalMoves;
     }
@@ -74,7 +82,7 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition start = move.getStartPosition();
         if (validMoves(start).contains(move)) {
-            board.movePiece(move, board);
+            board.movePiece(move);
             switchTeam();
         } else {
             throw new InvalidMoveException("That move isn't valid!");
@@ -126,7 +134,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        return true;
+        return false;
     }
 
     /**

@@ -12,8 +12,19 @@ import java.util.Objects;
 public class ChessBoard {
 
     ChessPiece[][] squares = new ChessPiece[8][8];
-    public ChessBoard() {
-        
+    public ChessBoard(){
+
+    }
+    public ChessBoard(ChessBoard other) {
+        this.squares = new ChessPiece[8][8];
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                ChessPiece piece = other.squares[row][col];
+                if (piece != null) {
+                    this.squares[row][col] = new ChessPiece(piece); // calls ChessPiece copy constructor
+                }
+            }
+        }
     }
 
     /**
@@ -37,15 +48,18 @@ public class ChessBoard {
         return squares[position.getRow() - 1][position.getColumn() - 1];
     }
 
-    public void movePiece(ChessMove move, ChessBoard board) {
+    public void movePiece(ChessMove move) {
         ChessPosition start = move.getStartPosition();
-        ChessPiece piece = board.getPiece(start);
+        ChessPiece piece = getPiece(start);
         if (piece == null) {
             throw new IllegalArgumentException("No piece at start position: " + start);
         }
         ChessPosition end = move.getEndPosition();
         squares[start.getRow() - 1][start.getColumn() - 1] = null;
         squares[end.getRow() - 1][end.getColumn() - 1] = piece;
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            squares[end.getRow() - 1][end.getColumn() - 1] = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
+        }
     }
 
     /**
