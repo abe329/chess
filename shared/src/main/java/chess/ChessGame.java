@@ -80,6 +80,22 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition KingPos = findKing(teamColor);
+
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition pos = new ChessPosition(i,j);
+                ChessPiece piece = board.getPiece(pos);
+                if (piece != null && piece.getTeamColor() != teamColor) {
+                    Collection<ChessMove> moves = piece.pieceMoves(board, pos);
+
+                    for (ChessMove move : moves) {
+                        if (move.getEndPosition().equals(KingPos)) { //AHHH the whole point of changing equals was to not have this problem.
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
         return false;
     }
 
