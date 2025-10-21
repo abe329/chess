@@ -32,19 +32,9 @@ public class GameHandler {
             ctx.json(body);
 
         } catch (ServiceException e) {
-            String msg = e.getMessage();
-            var errorBody = gson.toJson(Map.of("message", "Error: " + msg));
-
-            if (msg.contains("bad request")) ctx.status(400);
-            else if (msg.contains("already taken")) ctx.status(403);
-            else ctx.status(500);
-
-            ctx.json(errorBody);
-
+            ErrorResponse.sendError(ctx, e.getMessage());
         } catch (Exception e) {
-            var body = gson.toJson(Map.of("message", "Error: " + e.getMessage()));
-            ctx.status(500);
-            ctx.json(body);
+            ErrorResponse.sendError(ctx, e.getMessage(), 500);
         }
     }
 }

@@ -25,19 +25,10 @@ public class UserHandler {
             ctx.json(body);
 
         } catch (ServiceException e) {
-            String msg = e.getMessage();
-            var errorBody = gson.toJson(Map.of("message", "Error: " + msg));
-
-            if (msg.contains("bad request")) ctx.status(400);
-            else if (msg.contains("already taken")) ctx.status(403);
-            else ctx.status(500);
-
-            ctx.json(errorBody);
+            ErrorResponse.sendError(ctx, e.getMessage());
 
         } catch (Exception e) {
-            var body = gson.toJson(Map.of("message", "Error: " + e.getMessage()));
-            ctx.status(500);
-            ctx.json(body);
+            ErrorResponse.sendError(ctx, e.getMessage(), 500);
         }
     }
 
@@ -51,19 +42,9 @@ public class UserHandler {
             ctx.json(body);
 
         } catch (ServiceException e) {
-            String msg = e.getMessage();
-            var errorBody = gson.toJson(Map.of("message", msg));
-
-            if (msg.contains("bad request")) ctx.status(400);
-            else if (msg.contains("unauthorized")) ctx.status(401);
-            else ctx.status(500);
-
-            ctx.json(errorBody);
-
+            ErrorResponse.sendError(ctx, e.getMessage());
         } catch (Exception e) {
-            var body = gson.toJson(Map.of("message", e.getMessage()));
-            ctx.status(500);
-            ctx.json(body);
+            ErrorResponse.sendError(ctx, e.getMessage(), 500);
         }
     }
     public void logout(Context ctx) {
@@ -78,18 +59,9 @@ public class UserHandler {
             ctx.json(body);
 
         } catch (ServiceException e) {
-            String msg = e.getMessage();
-            var errorBody = gson.toJson(Map.of("message", msg));
-
-            if (msg.contains("unauthorized")) ctx.status(401);
-            else ctx.status(500);
-
-            ctx.json(errorBody);
-
+            ErrorResponse.sendError(ctx, e.getMessage());
         } catch (Exception e) {
-            var body = gson.toJson(Map.of("message", e.getMessage()));
-            ctx.status(500);
-            ctx.json(body);
+            ErrorResponse.sendError(ctx, e.getMessage(), 500);
         }
     }
 }

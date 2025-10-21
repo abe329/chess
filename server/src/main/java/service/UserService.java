@@ -1,11 +1,14 @@
-package service.RequestAndResults;
+package service;
 
 import dataAccess.DataAccess;
 import dataAccess.MemoryDataAccess;
 import dataAccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
-import service.ServiceException;
+import service.RequestAndResults.EmptyResult;
+import service.RequestAndResults.LoginRequest;
+import service.RequestAndResults.RegisterRequest;
+import service.RequestAndResults.UserResult;
 
 import java.util.UUID;
 

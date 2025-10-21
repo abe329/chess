@@ -3,10 +3,8 @@ package service;
 import dataAccess.DataAccess;
 import dataAccess.MemoryDataAccess;
 import dataAccess.DataAccessException;
-import model.AuthData;
 import model.GameData;
 import java.util.UUID;
-import model.UserData;
 import service.RequestAndResults.*;
 
 public class GameService {
