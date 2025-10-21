@@ -2,7 +2,6 @@ package server;
 
 import com.google.gson.Gson;
 import io.javalin.http.Context;
-import model.GameData;
 import service.GameService;
 import service.RequestAndResults.*;
 import service.ServiceException;

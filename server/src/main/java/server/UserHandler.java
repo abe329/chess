@@ -5,7 +5,6 @@ import io.javalin.http.Context;
 import service.*;
 import service.RequestAndResults.*;
 
-import java.util.Map;
 
 public class UserHandler {
     private final UserService userService;

@@ -16,7 +16,7 @@ public class Server {
 
 
         // Register your endpoints and exception handlers here.
-        DataAccess dataAccess = new MemoryDataAccess(); //probs gonna change this later on!
+        DataAccess dataAccess = new MemoryDataAccess(); //probs gonna change this in the next phase!
 
         AdminHandler adminHandler = new AdminHandler(new AdminService(dataAccess));
         UserHandler userHandler = new UserHandler(new UserService(dataAccess));
@@ -28,12 +28,8 @@ public class Server {
         javalin.post("/session", userHandler::login);
         javalin.delete("/session", userHandler::logout);
         javalin.post("/game", gameHandler::createGame);
-
-
-//        javalin.exception(Exception.class, (e, ctx) -> {
-//            ctx.status(500).json(Map.of("message", "Error: " + e.getMessage()));
-//
-//        });
+        // javalin.get("/game", gameHandler::listGames);
+        // javalin.put("/game", gameHandler::joinGame);
     }
 
     public int run(int desiredPort) {

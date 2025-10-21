@@ -3,6 +3,7 @@ package dataAccess;
 import model.AuthData;
 import model.UserData;
 import model.GameData;
+import java.util.Map;
 
 public interface DataAccess {
     void clear();
@@ -14,6 +15,6 @@ public interface DataAccess {
     void deleteAuth(String authToken) throws DataAccessException;
     void createGame(GameData game) throws DataAccessException;
     GameData getGame(Integer gameID) throws DataAccessException;
-
-    // Keep sticking more mini interfaces in to this MEGA interface
+    Map<Integer, GameData> listGames(String authToken) throws DataAccessException;
+    void joinGame(GameData game) throws DataAccessException;
 }

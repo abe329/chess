@@ -1,10 +1,6 @@
 package service;
 
 import dataAccess.DataAccess;
-import dataAccess.DataAccessException;
-import model.UserData;
-import model.AuthData;
-import model.GameData;
 import service.RequestAndResults.*;
 
 public class AdminService {

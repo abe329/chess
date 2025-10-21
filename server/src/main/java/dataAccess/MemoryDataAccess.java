@@ -45,7 +45,7 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
         if (!auths.containsKey(authToken)) {
-            throw new DataAccessException("unauthorized");
+            throw new DataAccessException("Error: unauthorized");
         }
         auths.remove(authToken);
     }
@@ -57,6 +57,25 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public GameData getGame(Integer gameID) throws DataAccessException {
-        return games.get(gameID);
+        GameData game = games.get(gameID);
+        if (game == null) {
+            throw new DataAccessException("Game not found");
+        }
+        return game;
+    }
+
+    public Map<Integer, GameData> listGames(String authToken) throws DataAccessException {
+        if (!auths.containsKey(authToken)) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+        return games;
+    }
+
+    @Override
+    public void joinGame(GameData game) throws DataAccessException {
+        if (!games.containsKey(game.gameID())) {
+            throw new DataAccessException("Error: bad request");
+        }
+        games.put(game.gameID(), game);
     }
 }
