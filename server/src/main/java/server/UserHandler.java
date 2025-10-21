@@ -3,6 +3,8 @@ package server;
 import com.google.gson.Gson;
 import io.javalin.http.Context;
 import service.*;
+import service.RequestAndResults.*;
+
 import java.util.Map;
 
 public class UserHandler {
@@ -68,7 +70,7 @@ public class UserHandler {
         try {
             // System.out.println("Headers: " + ctx.headerMap());
             String authToken = ctx.header("Authorization");
-            // System.out.println("Auth token received: " + authToken);
+            // System.out.println("Auth token: " + authToken);
             EmptyResult result = userService.logout(authToken);
 
             var body = gson.toJson(result);

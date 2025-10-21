@@ -1,10 +1,12 @@
-package service;
+package service.RequestAndResults;
 
 import dataAccess.DataAccess;
 import dataAccess.MemoryDataAccess;
 import dataAccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
+import service.ServiceException;
+
 import java.util.UUID;
 
 public class UserService {

@@ -10,7 +10,7 @@ import java.util.Map;
 public class MemoryDataAccess implements DataAccess {
     private final Map<String, UserData> users = new HashMap<>();
     private final Map<String, AuthData> auths = new HashMap<>();
-    private final Map<String, GameData> games = new HashMap<>();
+    private final Map<Integer, GameData> games = new HashMap<>();
 
     @Override
     public void clear() {
@@ -48,5 +48,15 @@ public class MemoryDataAccess implements DataAccess {
             throw new DataAccessException("unauthorized");
         }
         auths.remove(authToken);
+    }
+
+    @Override
+    public void createGame(GameData game) throws DataAccessException {
+        games.put(game.gameID(), game);
+    }
+
+    @Override
+    public GameData getGame(Integer gameID) throws DataAccessException {
+        return games.get(gameID);
     }
 }

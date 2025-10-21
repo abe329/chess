@@ -2,7 +2,7 @@ package dataAccess;
 
 import model.AuthData;
 import model.UserData;
-// 나중에 optional 라는 도서관 써야할 수도있다
+import model.GameData;
 
 public interface DataAccess {
     void clear();
@@ -12,6 +12,8 @@ public interface DataAccess {
     void createAuth(AuthData auth) throws DataAccessException;
     AuthData getAuth(String authToken) throws DataAccessException;
     void deleteAuth(String authToken) throws DataAccessException;
+    void createGame(GameData game) throws DataAccessException;
+    GameData getGame(Integer gameID) throws DataAccessException;
 
     // Keep sticking more mini interfaces in to this MEGA interface
 }
