@@ -17,7 +17,7 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
 
-    public RegisterResult register(RegisterRequest request) throws ServiceException {
+    public UserResult register(RegisterRequest request) throws ServiceException {
         if (request.username() == null || request.password() == null || request.email() == null) {
             throw new ServiceException("Error: bad request");
         }
@@ -32,7 +32,31 @@ public class UserService {
             AuthData auth = new AuthData(token, request.username());
             dataAccess.createAuth(auth);
 
-            return new RegisterResult(request.username(), token);
+            return new UserResult(request.username(), token);
+        } catch (DataAccessException e) {
+            throw new ServiceException("Error: " + e.getMessage());
+        }
+    }
+
+    public UserResult login(LoginRequest request) throws ServiceException {
+        if (request.username() == null || request.password() == null) {
+            throw new ServiceException("Error: bad request");
+        }
+        try {
+            UserData user = dataAccess.getUser(request.username());
+
+            if (user == null) {
+                throw new ServiceException("Error: unauthorized");
+            }
+            if (!user.password().equals(request.password())) {
+                throw new ServiceException("Error: unauthorized");
+            }
+
+            String token = UUID.randomUUID().toString();
+            AuthData auth = new AuthData(token, request.username());
+            dataAccess.createAuth(auth);
+
+            return new UserResult(request.username(), token);
         } catch (DataAccessException e) {
             throw new ServiceException("Error: " + e.getMessage());
         }

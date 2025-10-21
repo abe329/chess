@@ -16,6 +16,7 @@ public class Server {
         UserHandler userHandler = new UserHandler(new UserService());
 
         javalin.post("/user", userHandler::register);
+        javalin.post("/session", userHandler::login);
 
 //        javalin.exception(Exception.class, (e, ctx) -> {
 //            ctx.status(500).json(Map.of("message", "Error: " + e.getMessage()));
