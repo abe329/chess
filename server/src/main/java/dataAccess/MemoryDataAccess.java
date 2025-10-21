@@ -1,4 +1,4 @@
-package dataaccess;
+package dataAccess;
 
 import model.UserData;
 import model.AuthData;
@@ -6,7 +6,7 @@ import model.AuthData;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class MemoryDataAccess implements DataAccess {
+public class MemoryDataAccess implements DataAccess {
     private final Map<String, UserData> users = new HashMap<>();
     private final Map<String, AuthData> auths = new HashMap<>();
 
