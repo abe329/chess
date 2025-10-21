@@ -61,4 +61,20 @@ public class UserService {
             throw new ServiceException("Error: " + e.getMessage());
         }
     }
+
+    public EmptyResult logout(String authToken) throws ServiceException {
+        try {
+            AuthData auth = dataAccess.getAuth(authToken);
+            // System.out.println("Auth found? " + auth);
+            if (auth == null) {
+                throw new ServiceException("Error: unauthorized");
+            }
+
+            dataAccess.deleteAuth(authToken);
+            return new EmptyResult();
+
+        } catch (DataAccessException e) {
+            throw new ServiceException("Error: " + e.getMessage());
+        }
+    }
 }

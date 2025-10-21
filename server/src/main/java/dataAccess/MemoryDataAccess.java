@@ -27,15 +27,26 @@ public class MemoryDataAccess implements DataAccess {
         users.put(user.username(), user);
     }
 
+    @Override
     public UserData getUser(String username) throws DataAccessException {
         return users.get(username);
     }
 
+    @Override
     public void createAuth(AuthData auth) throws DataAccessException {
-        auths.put(auth.username(), auth);
+        auths.put(auth.authToken(), auth);
     }
 
-    public AuthData getAuthToken(String authToken) throws DataAccessException {
+    @Override
+    public AuthData getAuth(String authToken) throws DataAccessException {
         return auths.get(authToken);
+    }
+
+    @Override
+    public void deleteAuth(String authToken) throws DataAccessException {
+        if (!auths.containsKey(authToken)) {
+            throw new DataAccessException("unauthorized");
+        }
+        auths.remove(authToken);
     }
 }

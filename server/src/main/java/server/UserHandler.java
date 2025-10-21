@@ -53,7 +53,33 @@ public class UserHandler {
             var errorBody = gson.toJson(Map.of("message", msg));
 
             if (msg.contains("bad request")) ctx.status(400);
-            else if (msg.contains("already taken")) ctx.status(403);
+            else if (msg.contains("unauthorized")) ctx.status(401);
+            else ctx.status(500);
+
+            ctx.json(errorBody);
+
+        } catch (Exception e) {
+            var body = gson.toJson(Map.of("message", e.getMessage()));
+            ctx.status(500);
+            ctx.json(body);
+        }
+    }
+    public void logout(Context ctx) {
+        try {
+            // System.out.println("Headers: " + ctx.headerMap());
+            String authToken = ctx.header("Authorization");
+            // System.out.println("Auth token received: " + authToken);
+            EmptyResult result = userService.logout(authToken);
+
+            var body = gson.toJson(result);
+            ctx.status(200);
+            ctx.json(body);
+
+        } catch (ServiceException e) {
+            String msg = e.getMessage();
+            var errorBody = gson.toJson(Map.of("message", msg));
+
+            if (msg.contains("unauthorized")) ctx.status(401);
             else ctx.status(500);
 
             ctx.json(errorBody);
