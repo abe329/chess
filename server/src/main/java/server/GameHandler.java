@@ -40,6 +40,12 @@ public class GameHandler {
     public void listGames(Context ctx) {
         try {
             String authToken = ctx.header("Authorization");
+            ListGamesResult result = gameService.listGames(authToken);
+
+            var body = gson.toJson(result);
+            ctx.status(200);
+            ctx.json(body);
+
         } catch (ServiceException e) {
             ErrorResponse.sendError(ctx, e.getMessage());
         } catch (Exception e) {
@@ -50,6 +56,13 @@ public class GameHandler {
     public void joinGame(Context ctx) {
         try {
             String authToken = ctx.header("Authorization");
+            JoinGameRequest req = gson.fromJson(ctx.body(), JoinGameRequest.class);
+            EmptyResult result = gameService.joinGame(authToken, req);
+
+            var body = gson.toJson(result);
+            ctx.status(200);
+            ctx.json(body);
+
         } catch (ServiceException e) {
             ErrorResponse.sendError(ctx, e.getMessage());
         } catch (Exception e) {

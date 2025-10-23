@@ -1,10 +1,5 @@
 package service.RequestAndResults;
 
-enum playerColor {
-    WHITE,
-    BLACK;
-}
-
 public record JoinGameRequest(String playerColor, Integer gameID) {
 }
 
