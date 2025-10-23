@@ -2,9 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import io.javalin.http.Context;
-import service.GameService;
-import service.RequestAndResults.*;
-import service.ServiceException;
+import service.*;
+import service.requestsandresults.*;
 
 import java.util.Map;
 

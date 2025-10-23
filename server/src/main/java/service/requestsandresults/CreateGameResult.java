@@ -1,3 +1,3 @@
-package service.RequestAndResults;
+package service.requestsandresults;
 
 public record CreateGameResult(Integer gameID) { };

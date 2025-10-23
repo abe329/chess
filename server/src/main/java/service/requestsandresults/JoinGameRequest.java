@@ -1,4 +1,4 @@
-package service.RequestAndResults;
+package service.requestsandresults;
 
 public record JoinGameRequest(String playerColor, Integer gameID) {
 }

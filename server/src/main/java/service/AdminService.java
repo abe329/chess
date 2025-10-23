@@ -1,7 +1,7 @@
 package service;
 
-import dataAccess.DataAccess;
-import service.RequestAndResults.*;
+import dataaccess.DataAccess;
+import service.requestsandresults.EmptyResult;
 
 public class AdminService {
     private final DataAccess dataAccess;

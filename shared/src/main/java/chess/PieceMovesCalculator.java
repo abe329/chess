@@ -19,9 +19,9 @@ public class PieceMovesCalculator {
         boolean slider = pieceMoves.slider;
         ArrayList<ChessMove> moves = new ArrayList<>();
 
-        // PawnMovement does all pawn moves
+        // pawnMovement does all pawn moves
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            return PawnMovement(board, myPosition);
+            return pawnMovement(board, myPosition);
         }
 
         for(int[] i : directions) {
@@ -41,7 +41,7 @@ public class PieceMovesCalculator {
                      }
                      break;
                 }
-                if (!slider) break; //Knight and King don't move continuously
+                if (!slider) { break; } //Knight and King don't move continuously
 
                 row += dx;
                 col += dy;
@@ -67,7 +67,7 @@ public class PieceMovesCalculator {
         }
     }
 
-    private Collection<ChessMove> PawnMovement(ChessBoard board, ChessPosition myPosition) {
+    private Collection<ChessMove> pawnMovement(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         ChessPiece piece = board.getPiece(myPosition);
         int row = myPosition.getRow();
@@ -76,8 +76,8 @@ public class PieceMovesCalculator {
         int promotionRow;
 
         // real proud of these :)
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) promotionRow= 8; else { promotionRow = 1; }
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) pawnDirection = 1; else { pawnDirection= -1; }
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) { promotionRow= 8; } else { promotionRow = 1; }
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) { pawnDirection = 1;}  else { pawnDirection= -1; }
         int pawnRow = row + pawnDirection;
 
         if (isOnBoard(pawnRow, col) && board.getPiece(new ChessPosition(pawnRow, col)) == null) {

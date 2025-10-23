@@ -1,19 +1,19 @@
 package service;
 
-import dataAccess.DataAccess;
-import dataAccess.MemoryDataAccess;
-import dataAccess.DataAccessException;
+import dataaccess.DataAccess;
+import dataaccess.MemoryDataAccess;
+import dataaccess.DataAccessException;
 import model.GameData;
 import model.AuthData;
+import service.requestsandresults.*;
 // import java.util.UUID;
-import service.RequestAndResults.*;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 public class GameService {
     private final DataAccess dataAccess;
-    private int GameIDCounter = 1;
+    private int gameIDCounter = 1;
 
     public GameService() {
         this.dataAccess = new MemoryDataAccess();
@@ -27,7 +27,7 @@ public class GameService {
         if (request.authToken() == null || request.gameName() == null) {
             throw new ServiceException("Error: bad request");
         }
-        int gameID = GameIDCounter++;
+        int gameID = gameIDCounter++;
         GameData game = new GameData(gameID, null, null, request.gameName(), null);
 
         try {
@@ -71,10 +71,10 @@ public class GameService {
             String black = game.blackUsername();
 
             if (color.equals("white")) {
-                if (white != null) throw new ServiceException("Error: already taken");
+                if (white != null) { throw new ServiceException("Error: already taken"); }
                 white = auth.username();
             } else if (color.equals("black")) {
-                if (black != null) throw new ServiceException("Error: already taken");
+                if (black != null) { throw new ServiceException("Error: already taken"); }
                 black = auth.username();
             } else {
                 throw new ServiceException("Error: bad request"); // invalid color

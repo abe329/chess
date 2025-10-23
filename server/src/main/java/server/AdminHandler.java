@@ -3,7 +3,7 @@ package server;
 import com.google.gson.Gson;
 import io.javalin.http.Context;
 import service.AdminService;
-import service.RequestAndResults.EmptyResult;
+import service.requestsandresults.EmptyResult;
 import service.ServiceException;
 
 public class AdminHandler {
