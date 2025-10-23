@@ -31,6 +31,8 @@ public class GameService {
         GameData game = new GameData(gameID, null, null, request.gameName(), null);
 
         try {
+            AuthData auth = dataAccess.getAuth(request.authToken());
+            if (auth == null) { throw new ServiceException("Error: unauthorized"); }
             dataAccess.createGame(game);
             return new CreateGameResult(gameID);
         } catch (DataAccessException e) {
