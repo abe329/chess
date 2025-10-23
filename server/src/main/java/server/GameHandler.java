@@ -36,4 +36,24 @@ public class GameHandler {
             ErrorResponse.sendError(ctx, e.getMessage(), 500);
         }
     }
+
+    public void listGames(Context ctx) {
+        try {
+            String authToken = ctx.header("Authorization");
+        } catch (ServiceException e) {
+            ErrorResponse.sendError(ctx, e.getMessage());
+        } catch (Exception e) {
+            ErrorResponse.sendError(ctx, e.getMessage(), 500);
+        }
+    }
+
+    public void joinGame(Context ctx) {
+        try {
+            String authToken = ctx.header("Authorization");
+        } catch (ServiceException e) {
+            ErrorResponse.sendError(ctx, e.getMessage());
+        } catch (Exception e) {
+            ErrorResponse.sendError(ctx, e.getMessage(), 500);
+        }
+    }
 }

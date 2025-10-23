@@ -33,7 +33,7 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void createAuth(AuthData auth) throws DataAccessException {
+    public void createAuth(AuthData auth) {
         auths.put(auth.authToken(), auth);
     }
 
@@ -59,7 +59,7 @@ public class MemoryDataAccess implements DataAccess {
     public GameData getGame(Integer gameID) throws DataAccessException {
         GameData game = games.get(gameID);
         if (game == null) {
-            throw new DataAccessException("Game not found");
+            throw new DataAccessException("Error: bad request");
         }
         return game;
     }
