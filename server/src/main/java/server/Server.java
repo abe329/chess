@@ -2,6 +2,7 @@ package server;
 
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import io.javalin.*;
 import service.AdminService;
 import service.GameService;
@@ -17,6 +18,7 @@ public class Server {
 
         // Register your endpoints and exception handlers here.
         DataAccess dataAccess = new MemoryDataAccess(); //probs gonna change this in the next phase!
+        // DataAccess dataAccess = new MySqlDataAccess();
 
         AdminHandler adminHandler = new AdminHandler(new AdminService(dataAccess));
         UserHandler userHandler = new UserHandler(new UserService(dataAccess));
