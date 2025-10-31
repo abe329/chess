@@ -50,10 +50,7 @@ public class UserService {
         try {
             UserData user = dataAccess.getUser(request.username());
 
-            if (user == null) {
-                throw new ServiceException("Error: unauthorized");
-            }
-            if (!user.password().equals(request.password())) {
+            if (!dataAccess.verifyUser(request.username(), request.password())) {
                 throw new ServiceException("Error: unauthorized");
             }
 

@@ -33,6 +33,16 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
+    public boolean verifyUser(String username, String providedPassword) {
+        UserData user = users.get(username);
+        if (user == null) {
+            return false;
+        }
+        return user.password().equals(providedPassword);
+    }
+
+
+    @Override
     public void createAuth(AuthData auth) {
         auths.put(auth.authToken(), auth);
     }

@@ -2,6 +2,7 @@ package dataaccess;
 
 import com.google.gson.Gson;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -32,8 +33,21 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
-        var statement = "INSERT INTO user (username, password) VALUES (?, ?)";
-        executeUpdate(statement, user.username(), user.password());
+//        var statement = "INSERT INTO user (username, password) VALUES (?, ?)";
+//        executeUpdate(statement, user.username(), user.password());
+        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, user.username());
+                ps.setString(2, hashedPassword); // store hashed password, not clear text
+                ps.setString(3, user.email());
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error inserting user", e);
+        }
     }
 
     @Override
@@ -51,6 +65,15 @@ public class MySqlDataAccess implements DataAccess {
             throw new DataAccessException("Error getting user: " + e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public boolean verifyUser(String username, String providedPassword) throws DataAccessException{
+        UserData user = getUser(username);
+        if (user == null) {
+            return false;
+        }
+        return BCrypt.checkpw(providedPassword, user.password());
     }
 
 
