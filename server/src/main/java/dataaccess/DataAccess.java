@@ -6,7 +6,7 @@ import model.GameData;
 import java.util.Map;
 
 public interface DataAccess {
-    void clear();
+    void clear() throws DataAccessException;
     void createUser(UserData user) throws DataAccessException;
     UserData getUser(String username) throws DataAccessException;
 

@@ -18,8 +18,16 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     @Override
-    public void clear() {
-
+    public void clear() throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var stmt = conn.createStatement()) {
+                stmt.executeUpdate("TRUNCATE TABLE auth");
+                stmt.executeUpdate("TRUNCATE TABLE game");
+                stmt.executeUpdate("TRUNCATE TABLE user");
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error clearing database: " + e.getMessage());
+        }
     }
 
     @Override
@@ -130,64 +138,6 @@ public class MySqlDataAccess implements DataAccess {
         executeUpdate(statement, game.whiteUsername(), game.blackUsername(), json, game.gameID());
     }
 
-//    public Pet addPet(Pet pet) throws ResponseException {
-//        var statement = "INSERT INTO pet (name, type, json) VALUES (?, ?, ?)";
-//        String json = new Gson().toJson(pet);
-//        int id = executeUpdate(statement, pet.name(), pet.type(), json);
-//        return new Pet(id, pet.name(), pet.type());
-//    }
-//
-//    public Pet getPet(int id) throws ResponseException {
-//        try (Connection conn = DatabaseManager.getConnection()) {
-//            var statement = "SELECT id, json FROM pet WHERE id=?";
-//            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-//                ps.setInt(1, id);
-//                try (ResultSet rs = ps.executeQuery()) {
-//                    if (rs.next()) {
-//                        return readPet(rs);
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
-//        }
-//        return null;
-//    }
-//
-//    public PetList listPets() throws ResponseException {
-//        var result = new PetList();
-//        try (Connection conn = DatabaseManager.getConnection()) {
-//            var statement = "SELECT id, json FROM pet";
-//            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-//                try (ResultSet rs = ps.executeQuery()) {
-//                    while (rs.next()) {
-//                        result.add(readPet(rs));
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
-//        }
-//        return result;
-//    }
-//
-//    public void deletePet(Integer id) throws ResponseException {
-//        var statement = "DELETE FROM pet WHERE id=?";
-//        executeUpdate(statement, id);
-//    }
-//
-//    public void deleteAllPets() throws ResponseException {
-//        var statement = "TRUNCATE pet";
-//        executeUpdate(statement);
-//    }
-//
-//    private Pet readPet(ResultSet rs) throws SQLException {
-//        var id = rs.getInt("id");
-//        var json = rs.getString("json");
-//        Pet pet = new Gson().fromJson(json, Pet.class);
-//        return pet.setId(id);
-//    }
-//
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
@@ -213,7 +163,7 @@ public class MySqlDataAccess implements DataAccess {
 
     private final String[] createStatements = {
         """
-        CREATE TABLE IF NOT EXISTS  user (
+        CREATE TABLE IF NOT EXISTS user (
             username VARCHAR(255) NOT NULL PRIMARY KEY,
             password VARCHAR(255) NOT NULL
         )
@@ -233,8 +183,7 @@ public class MySqlDataAccess implements DataAccess {
             gameName VARCHAR(255),
             gameJSON TEXT NOT NULL,
             FOREIGN KEY (whiteUsername) REFERENCES user(username) ON DELETE SET NULL,
-            FOREIGN KEY (blackUsername) REFERENCES user(username) ON DELETE SET NULL,
-
+            FOREIGN KEY (blackUsername) REFERENCES user(username) ON DELETE SET NULL
         )
         """
     };

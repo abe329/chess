@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import service.requestsandresults.EmptyResult;
 
 public class AdminService {
@@ -10,7 +11,7 @@ public class AdminService {
         this.dataAccess = dataAccess;
     }
 
-    public EmptyResult clear() throws ServiceException {
+    public EmptyResult clear() throws DataAccessException {
         dataAccess.clear();
         return new EmptyResult();
     }

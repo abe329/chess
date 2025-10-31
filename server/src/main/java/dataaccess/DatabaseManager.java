@@ -8,6 +8,7 @@ public class DatabaseManager {
     private static String dbUsername;
     private static String dbPassword;
     private static String connectionUrl;
+    private static String baseUrl;
 
     /*
      * Load the database information for the db.properties file.
@@ -20,8 +21,15 @@ public class DatabaseManager {
      * Creates the database if it does not already exist.
      */
     static public void createDatabase() throws DataAccessException {
+//        var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
+//        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+//             var preparedStatement = conn.prepareStatement(statement)) {
+//            preparedStatement.executeUpdate();
+//        } catch (SQLException ex) {
+//            throw new DataAccessException("failed to create database", ex);
+//        }
         var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
-        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+        try (var conn = DriverManager.getConnection(baseUrl, dbUsername, dbPassword);
              var preparedStatement = conn.prepareStatement(statement)) {
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -42,11 +50,16 @@ public class DatabaseManager {
      * </code>
      */
     static Connection getConnection() throws DataAccessException {
+//        try {
+//            //do not wrap the following line with a try-with-resources
+//            var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+//            conn.setCatalog(databaseName);
+//            return conn;
+//        } catch (SQLException ex) {
+//            throw new DataAccessException("failed to get connection", ex);
+//        }
         try {
-            //do not wrap the following line with a try-with-resources
-            var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
-            conn.setCatalog(databaseName);
-            return conn;
+            return DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
         } catch (SQLException ex) {
             throw new DataAccessException("failed to get connection", ex);
         }
@@ -72,6 +85,8 @@ public class DatabaseManager {
 
         var host = props.getProperty("db.host");
         var port = Integer.parseInt(props.getProperty("db.port"));
+        baseUrl = String.format("jdbc:mysql://%s:%d", host, port); // for creating DB
+
         connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
     }
 }
