@@ -17,8 +17,16 @@ public class Server {
 
 
         // Register your endpoints and exception handlers here.
-        DataAccess dataAccess = new MemoryDataAccess(); //probs gonna change this in the next phase!
-        // DataAccess dataAccess = new MySqlDataAccess();
+        // DataAccess dataAccess = new MemoryDataAccess(); //probs gonna change this in the next phase!
+        DataAccess dataAccess;
+        try {
+            dataAccess = new MySqlDataAccess();
+            System.out.println("Using MySQL database for persistence");
+        } catch (Exception e) {
+            System.out.println("MySQL not available.");
+            e.printStackTrace();
+            dataAccess = new MemoryDataAccess();
+        }
 
         AdminHandler adminHandler = new AdminHandler(new AdminService(dataAccess));
         UserHandler userHandler = new UserHandler(new UserService(dataAccess));

@@ -15,9 +15,6 @@ import java.util.UUID;
 public class UserService {
     private final DataAccess dataAccess;
 
-    public UserService() {
-        this.dataAccess = new MemoryDataAccess(); // Probably CCHANGE THIS LATER to database implementation
-    }
     public UserService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }

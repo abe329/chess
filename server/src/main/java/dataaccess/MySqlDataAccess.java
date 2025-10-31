@@ -22,9 +22,9 @@ public class MySqlDataAccess implements DataAccess {
     public void clear() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var stmt = conn.createStatement()) {
-                stmt.executeUpdate("TRUNCATE TABLE auth");
-                stmt.executeUpdate("TRUNCATE TABLE game");
-                stmt.executeUpdate("TRUNCATE TABLE user");
+                stmt.executeUpdate("DELETE FROM auth");
+                stmt.executeUpdate("DELETE FROM game");
+                stmt.executeUpdate("DELETE FROM user");
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error clearing database: " + e.getMessage());
@@ -41,7 +41,7 @@ public class MySqlDataAccess implements DataAccess {
             var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, user.username());
-                ps.setString(2, hashedPassword); // store hashed password, not clear text
+                ps.setString(2, hashedPassword);
                 ps.setString(3, user.email());
                 ps.executeUpdate();
             }
@@ -52,7 +52,7 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        var statement = "SELECT username, password FROM user WHERE username=?";
+        var statement = "SELECT username, password, email FROM user WHERE username=?";
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement(statement)) {
             ps.setString(1, username);
@@ -188,7 +188,8 @@ public class MySqlDataAccess implements DataAccess {
         """
         CREATE TABLE IF NOT EXISTS user (
             username VARCHAR(255) NOT NULL PRIMARY KEY,
-            password VARCHAR(255) NOT NULL
+            password VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL
         )
         """,
         """
@@ -213,16 +214,29 @@ public class MySqlDataAccess implements DataAccess {
 
 
     private void configureDatabase() throws DataAccessException {
+        System.out.println("Starting configureDatabase...");
+
+        // Print database info before trying to connect
+        System.out.println("Attempting MySQL connection using URL: " + DatabaseManager.getConnectionUrl());
+
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
+            System.out.println("Connection successful: " + conn);
+            System.out.println("Database: " + DatabaseManager.getDatabaseName());
+
             for (String statement : createStatements) {
+                System.out.println("Executing SQL statement: " + statement);
+
                 try (var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
                 }
             }
+            System.out.println("Database configuration complete!");
         } catch (SQLException ex) {
-            throw new DataAccessException("Error: Unable to configure database.");
-            // throw new DataAccessException(DataAccessException.Code.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
-        }
+            System.err.println("SQLException occurred: " + ex.getMessage());
+            ex.printStackTrace();  // This will show the detailed reason for failure
+            throw new DataAccessException("Error: Unable to configure database.", ex);
+        }    // throw new DataAccessException(DataAccessException.Code.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
     }
+
 }

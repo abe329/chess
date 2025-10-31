@@ -21,13 +21,6 @@ public class DatabaseManager {
      * Creates the database if it does not already exist.
      */
     static public void createDatabase() throws DataAccessException {
-//        var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
-//        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
-//             var preparedStatement = conn.prepareStatement(statement)) {
-//            preparedStatement.executeUpdate();
-//        } catch (SQLException ex) {
-//            throw new DataAccessException("failed to create database", ex);
-//        }
         var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
         try (var conn = DriverManager.getConnection(baseUrl, dbUsername, dbPassword);
              var preparedStatement = conn.prepareStatement(statement)) {
@@ -50,14 +43,6 @@ public class DatabaseManager {
      * </code>
      */
     static Connection getConnection() throws DataAccessException {
-//        try {
-//            //do not wrap the following line with a try-with-resources
-//            var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
-//            conn.setCatalog(databaseName);
-//            return conn;
-//        } catch (SQLException ex) {
-//            throw new DataAccessException("failed to get connection", ex);
-//        }
         try {
             return DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
         } catch (SQLException ex) {
@@ -87,6 +72,19 @@ public class DatabaseManager {
         var port = Integer.parseInt(props.getProperty("db.port"));
         baseUrl = String.format("jdbc:mysql://%s:%d", host, port); // for creating DB
 
-        connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
+        connectionUrl = String.format("jdbc:mysql://%s:%d/%s", host, port, databaseName);
+    }
+
+    public static String getConnectionUrl() {
+        return connectionUrl;
+    }
+    public static String getDatabaseName() {
+        return databaseName;
+    }
+    public static String getPassword() {
+        return dbPassword;
+    }
+    public static String getUsername() {
+        return dbUsername;
     }
 }
