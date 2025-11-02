@@ -201,7 +201,7 @@ public class MySqlDataAccess implements DataAccess {
         """,
         """
         CREATE TABLE IF NOT EXISTS game (
-            gameID INT NOT NULL PRIMARY KEY,
+            gameID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
             whiteUsername VARCHAR(255),
             blackUsername VARCHAR(255),
             gameName VARCHAR(255),
@@ -211,7 +211,6 @@ public class MySqlDataAccess implements DataAccess {
         )
         """
     };
-
 
     private void configureDatabase() throws DataAccessException {
         System.out.println("Starting configureDatabase...");
@@ -238,5 +237,4 @@ public class MySqlDataAccess implements DataAccess {
             throw new DataAccessException("Error: Unable to configure database.", ex);
         }    // throw new DataAccessException(DataAccessException.Code.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
     }
-
 }
