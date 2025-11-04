@@ -4,10 +4,8 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
-import service.ServiceException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,7 +29,7 @@ public class DataAccessUnitTests {
         dao.clear();
         UserData user = new UserData("abe", "mypassword", "a@gmail.com");
         dao.createUser(user);
-        UserData retrievedUser = dao.getUser("abe"); // implement getUser to fetch UserData by username
+        UserData retrievedUser = dao.getUser("abe");
         assertNotNull(retrievedUser);
 
         assertEquals("abe", retrievedUser.username());
@@ -248,7 +246,6 @@ public class DataAccessUnitTests {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
-        // This user doesn’t exist in user table
         GameData badGame = new GameData(0, "ghost", null, "PhantomGame", new chess.ChessGame());
 
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
@@ -314,7 +311,6 @@ public class DataAccessUnitTests {
 
         dao.createUser(new UserData("player1", "123", "p1@email.com"));
 
-        // Try to join a game that doesn’t exist
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
             dao.joinGame(new GameData(999, "player1", "player2", "WHITE", new chess.ChessGame()));
         });

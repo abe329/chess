@@ -136,28 +136,6 @@ public class MySqlDataAccess implements DataAccess {
         return null;
     }
 
-//    @Override
-//    public Map<Integer, GameData> listGames(String authToken) throws DataAccessException {
-//        if (getAuth(authToken) == null) {
-//            throw new DataAccessException("Error: unauthorized");
-//        }
-//
-//        var result = new HashMap<Integer, GameData>();
-//        var statement = "SELECT gameID, gameJSON FROM game";
-//        try (var conn = DatabaseManager.getConnection();
-//             var ps = conn.prepareStatement(statement);
-//             var rs = ps.executeQuery()) {
-//            while (rs.next()) {
-//                int id = rs.getInt("gameID");
-//                GameData game = new Gson().fromJson(rs.getString("gameJSON"), GameData.class);
-//                result.put(id, game);
-//            }
-//        } catch (SQLException e) {
-//            throw new DataAccessException("Error: listing games: " + e.getMessage());
-//        }
-//        return result;
-//    }
-
     @Override
     public Map<Integer, GameData> listGames(String authToken) throws DataAccessException {
         if (getAuth(authToken) == null) {
