@@ -23,7 +23,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("CreateUser - Positive")
-    public void testCreateUser_Positive() throws Exception {
+    public void testCreateUserPositive() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
 
         dao.clear();
@@ -40,7 +40,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("CreateUser - Negative")
-    public void testCreateUser_Negative() throws Exception {
+    public void testCreateUserNegative() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -57,7 +57,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("GetUser - Positive")
-    public void testGetUser_Positive() throws Exception {
+    public void testGetUserPositive() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -70,7 +70,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("GetUser - Negative")
-    public void testGetUser_Negative() throws Exception {
+    public void testGetUserNegative() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -79,7 +79,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("VerifyUser - Positive")
-    public void testVerifyUser_Positive() throws Exception {
+    public void testVerifyUserPositive() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -89,7 +89,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("VerifyUser - Negative")
-    public void testVerifyUser_Negative() throws Exception {
+    public void testVerifyUserNegative() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -100,7 +100,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("ListGames - Positive")
-    public void testListGames_Positive() throws Exception {
+    public void testListGamesPositive() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
         dao.createUser(new UserData("Tea", "The", "winds@blew.up"));
@@ -115,7 +115,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("ListGames - Negative")
-    public void testListGames_Negative() throws Exception {
+    public void testListGamesNegative() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -128,7 +128,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("createAuth - Positive")
-    public void testCreateAuth_Positive() throws Exception {
+    public void testCreateAuthPositive() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -148,7 +148,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("createAuth - Negative")
-    public void testCreateAuth_Negative() throws Exception {
+    public void testCreateAuthNegative() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -168,7 +168,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("getAuth - Positive")
-    public void testGetAuth_Positive() throws Exception {
+    public void testGetAuthPositive() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -184,7 +184,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("GetAuth - Negative")
-    public void testGetAuth_Negative() throws Exception {
+    public void testGetAuthNegative() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -193,7 +193,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("DeleteAuth - Positive")
-    public void testDeleteAuth_Positive() throws Exception {
+    public void testDeleteAuthPositive() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -207,7 +207,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("deleteAuth - Negative")
-    public void testDeleteAuth_Negative() throws Exception {
+    public void testDeleteAuthNegative() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -222,7 +222,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("createGame - Positive")
-    public void testCreateGame_Positive() throws Exception {
+    public void testCreateGamePositive() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -242,7 +242,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("createGame - Negative")
-    public void testCreateGame_Negative() throws Exception {
+    public void testCreateGameNegative() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -259,7 +259,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("getGame - Positive")
-    public void testGetGame_Positive() throws Exception {
+    public void testGetGamePositive() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -277,7 +277,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("GetGame - Negative")
-    public void testGetGame_Negative() throws Exception {
+    public void testGetGameNegative() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -286,7 +286,7 @@ public class DataAccessUnitTests {
 
     @Test
     @DisplayName("JoinGame - Positive")
-    public void testJoinGame_Positive() throws Exception {
+    public void testJoinGamePositive() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -304,8 +304,8 @@ public class DataAccessUnitTests {
     }
 
     @Test
-    @DisplayName("joinGame - Negative (invalid game ID)")
-    public void testJoinGame_Negative() throws Exception {
+    @DisplayName("joinGame - Negative")
+    public void testJoinGameNegative() throws Exception {
         MySqlDataAccess dao = new MySqlDataAccess();
         dao.clear();
 
@@ -315,7 +315,7 @@ public class DataAccessUnitTests {
             dao.joinGame(new GameData(999, "player1", "player2", "WHITE", new chess.ChessGame()));
         });
 
-        assertTrue(ex.getMessage().toLowerCase().contains("not found") ||
+        assertTrue(ex.getMessage().toLowerCase().contains("bad request") ||
                 ex.getMessage().toLowerCase().contains("full"));
     }
 

@@ -238,11 +238,6 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
-
-
-
-
-
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
@@ -264,9 +259,9 @@ public class MySqlDataAccess implements DataAccess {
         } catch (SQLException e) {
             String msg = e.getMessage().toLowerCase();
             if (msg.contains("duplicate") || msg.contains("unique")) {
-                throw new DataAccessException("forbidden");
+                throw new DataAccessException("unable to insert duplicate");
             } else if (msg.contains("foreign key")) {
-                throw new DataAccessException("bad request");
+                throw new DataAccessException("foreign key failure");
             }
             throw new DataAccessException("database failure: " + e.getMessage());
         }
