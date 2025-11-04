@@ -147,7 +147,7 @@ public class DatabaseTests {
                 try (var resultSet = statement.executeQuery(sql)) {
                     if (resultSet.next()) {
                         rows.addAndGet(resultSet.getInt(1));
-                        System.out.println("Counting rows in database: " + resultSet.getString(1));
+                        // System.out.println("Counting rows in database: " + resultSet.getString(1));
                         // System.out.println("Table " + tableName + " has " + count + " rows");
                     }
                 }

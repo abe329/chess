@@ -21,9 +21,9 @@ public class Server {
         DataAccess dataAccess;
         try {
             dataAccess = new MySqlDataAccess();
-            System.out.println("Using MySQL database for persistence");
+            // System.out.println("Using MySQL database for persistence");
         } catch (Exception e) {
-            System.out.println("MySQL not available.");
+            // System.out.println("MySQL not available.");
             e.printStackTrace();
             dataAccess = new MemoryDataAccess();
         }
