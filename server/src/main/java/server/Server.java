@@ -13,6 +13,7 @@ public class Server {
     private final Javalin javalin;
 
     public Server() {
+        // System.out.println(">>> STARTING NEW SERVER INSTANCE <<< " + this);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
 

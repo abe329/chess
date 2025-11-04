@@ -56,6 +56,8 @@ public class GameHandler {
         try {
             String authToken = ctx.header("Authorization");
             JoinGameRequest req = gson.fromJson(ctx.body(), JoinGameRequest.class);
+            System.out.println(">>> joinGame(): color=" + req.playerColor() + ", gameID=" + req.gameID());
+
             EmptyResult result = gameService.joinGame(authToken, req);
 
             var body = gson.toJson(result);

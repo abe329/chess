@@ -13,7 +13,6 @@ import java.util.Map;
 
 public class GameService {
     private final DataAccess dataAccess;
-    private int gameIDCounter = 1;
 
     public GameService() {
         this.dataAccess = new MemoryDataAccess();
@@ -27,14 +26,13 @@ public class GameService {
         if (request.authToken() == null || request.gameName() == null) {
             throw new ServiceException("Error: bad request");
         }
-        int gameID = gameIDCounter++;
-        GameData game = new GameData(gameID, null, null, request.gameName(), null);
-
         try {
             AuthData auth = dataAccess.getAuth(request.authToken());
             if (auth == null) { throw new ServiceException("Error: unauthorized"); }
-            dataAccess.createGame(game);
-            return new CreateGameResult(gameID);
+
+            GameData game = new GameData(null, null, null, request.gameName(), null);
+            GameData created = dataAccess.createGame(game);  // use returned object from DB
+            return new CreateGameResult(created.gameID());
         } catch (DataAccessException e) {
             throw new ServiceException("Error: " + e.getMessage());
         }
@@ -57,13 +55,16 @@ public class GameService {
     }
 
     public EmptyResult joinGame(String authToken, JoinGameRequest request) throws ServiceException {
+        // System.out.println(">>> joinGame(): color=" + request.playerColor() + ", gameID=" + request.gameID());
         if (request.playerColor() == null || request.gameID() == null) {
             throw new ServiceException("Error: bad request");
         }
+
         try {
             AuthData auth = dataAccess.getAuth(authToken);
             if (auth == null) { throw new ServiceException("Error: unauthorized"); }
             GameData game = dataAccess.getGame(request.gameID());
+            // if (game == null) { System.out.println(">>> joinGame(): game is null"); }
             if (game == null) { throw new ServiceException("Error: bad request"); }
 
             String color = request.playerColor().toLowerCase();
@@ -81,12 +82,14 @@ public class GameService {
             }
 
             GameData updated = new GameData(game.gameID(), white, black, game.gameName(), game.game());
-
+            // System.out.println(">>> joinGame(): updating DB with white=" + white + ", black=" + black);
             dataAccess.joinGame(updated);
             return new EmptyResult();
 
         } catch (DataAccessException e) {
+            // System.out.println(">>> joinGame(): caught DataAccessException: " + e.getMessage());
             throw new ServiceException("Error: " + e.getMessage());
         }
+
     }
 }

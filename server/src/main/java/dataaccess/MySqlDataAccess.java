@@ -20,16 +20,27 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void clear() throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var stmt = conn.createStatement()) {
-                stmt.executeUpdate("DELETE FROM auth");
-                stmt.executeUpdate("DELETE FROM game");
-                stmt.executeUpdate("DELETE FROM user");
-            }
+        // System.out.println(">>> CLEARING DATABASE <<<");
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.createStatement()) {
+
+            // Disable FK checks so truncates won't fail
+            stmt.execute("SET FOREIGN_KEY_CHECKS = 0");
+
+            stmt.executeUpdate("TRUNCATE TABLE auth");
+            stmt.executeUpdate("TRUNCATE TABLE game");
+            stmt.executeUpdate("TRUNCATE TABLE user");
+
+            // Re-enable FK checks
+            stmt.execute("SET FOREIGN_KEY_CHECKS = 1");
+
         } catch (SQLException e) {
-            throw new DataAccessException("Error clearing database: " + e.getMessage());
+            throw new DataAccessException("clearing database: " + e.getMessage());
         }
     }
+
+
+
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
@@ -48,9 +59,9 @@ public class MySqlDataAccess implements DataAccess {
         } catch (SQLException e) {
             if (e.getMessage().toLowerCase().contains("duplicate") ||
                     e.getMessage().toLowerCase().contains("unique")) {
-                throw new DataAccessException("Error: Username already taken", e);
+                throw new DataAccessException("Username already taken", e);
             }
-            throw new DataAccessException("Error: inserting user", e);
+            throw new DataAccessException("inserting user", e);
         }
     }
 
@@ -66,7 +77,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: getting user: " + e.getMessage());
+            throw new DataAccessException("getting user: " + e.getMessage());
         }
         return null;
     }
@@ -99,7 +110,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: getting auth: " + e.getMessage());
+            throw new DataAccessException("getting auth: " + e.getMessage());
         }
         return null;
     }
@@ -115,31 +126,43 @@ public class MySqlDataAccess implements DataAccess {
         String json = new Gson().toJson(game);
         var statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, gameJSON) VALUES (?, ?, ?, ?)";
         int id = executeUpdate(statement, game.whiteUsername(), game.blackUsername(), game.gameName(), json);
+        // System.out.println(">>> DAO.createGame(): returned id=" + id);
         return new GameData(id, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
     }
 
     @Override
     public GameData getGame(Integer gameID) throws DataAccessException {
-        var statement = "SELECT gameJSON FROM game WHERE gameID=?";
+        // System.out.println(">>> DAO.getGame(): checking gameID=" + gameID);
+        var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, gameJSON FROM game WHERE gameID=?";
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement(statement)) {
             ps.setInt(1, gameID);
             try (var rs = ps.executeQuery()) {
                 if (rs.next()) {
                     String json = rs.getString("gameJSON");
-                    return new Gson().fromJson(json, GameData.class);
+                    GameData parsed = new Gson().fromJson(json, GameData.class);
+                    return new GameData(
+                            rs.getInt("gameID"),
+                            rs.getString("whiteUsername"),
+                            rs.getString("blackUsername"),
+                            rs.getString("gameName"),
+                            parsed.game()
+                    );
+                } else {
+                    // System.out.println(">>> DAO.getGame(): no game found for ID=" + gameID);
+                    return null;
                 }
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error: getting game: " + e.getMessage());
         }
-        return null;
     }
+
 
     @Override
     public Map<Integer, GameData> listGames(String authToken) throws DataAccessException {
         if (getAuth(authToken) == null) {
-            throw new DataAccessException("Error: unauthorized");
+            throw new DataAccessException("unauthorized");
         }
 
         var result = new HashMap<Integer, GameData>();
@@ -164,7 +187,7 @@ public class MySqlDataAccess implements DataAccess {
                 result.put(id, game);
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: listing games: " + e.getMessage());
+            throw new DataAccessException("listing games: " + e.getMessage());
         }
         return result;
     }
@@ -172,27 +195,52 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void joinGame(GameData game) throws DataAccessException {
-        String json = new Gson().toJson(game);
+        GameData existing = getGame(game.gameID());
+        // System.out.println(">>> DAO.joinGame(): gameID=" + game.gameID());
+
+        if (existing == null) {
+            throw new DataAccessException("Error: bad request"); // invalid gameID
+        }
+
+        if (game.whiteUsername() != null && existing.whiteUsername() != null
+                && !game.whiteUsername().equals(existing.whiteUsername())) {
+            throw new DataAccessException("Error: already taken");
+        }
+        if (game.blackUsername() != null && existing.blackUsername() != null
+                && !game.blackUsername().equals(existing.blackUsername())) {
+            throw new DataAccessException("Error: already taken");
+        }
+
+        String white = game.whiteUsername() != null ? game.whiteUsername() : existing.whiteUsername();
+        String black = game.blackUsername() != null ? game.blackUsername() : existing.blackUsername();
+
+        // System.out.println(">>> DAO.joinGame(): writing white=" + white + ", black=" + black);
+
+        String json = new Gson().toJson(new GameData(game.gameID(), white, black, game.gameName(), game.game()));
         var statement = "UPDATE game SET whiteUsername=?, blackUsername=?, gameJSON=? WHERE gameID=?";
 
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement(statement)) {
 
-            ps.setString(1, game.whiteUsername());
-            ps.setString(2, game.blackUsername());
+            ps.setString(1, white);
+            ps.setString(2, black);
             ps.setString(3, json);
             ps.setInt(4, game.gameID());
 
             int rowsUpdated = ps.executeUpdate();
-
-            if (rowsUpdated == 0) {
-                throw new DataAccessException("Error: Game ID not found or update failed");
+            if (rowsUpdated == 0 && getGame(game.gameID()) == null) {
+                throw new DataAccessException("Error: bad request");
             }
 
         } catch (SQLException e) {
-            throw new DataAccessException("Error updating game", e);
+            // System.out.println(">>> DAO.joinGame(): SQLException: " + e.getMessage());
+            throw new DataAccessException("Error: updating game failed: " + e.getMessage());
         }
     }
+
+
+
+
 
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
@@ -214,7 +262,13 @@ public class MySqlDataAccess implements DataAccess {
                 return 0;
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: unable to update database: " + e.getMessage());
+            String msg = e.getMessage().toLowerCase();
+            if (msg.contains("duplicate") || msg.contains("unique")) {
+                throw new DataAccessException("forbidden");
+            } else if (msg.contains("foreign key")) {
+                throw new DataAccessException("bad request");
+            }
+            throw new DataAccessException("database failure: " + e.getMessage());
         }
     }
 
@@ -267,7 +321,7 @@ public class MySqlDataAccess implements DataAccess {
         } catch (SQLException ex) {
             // System.err.println("SQLException occurred: " + ex.getMessage());
             ex.printStackTrace();  // This will show the detailed reason for failure
-            throw new DataAccessException("Error: Unable to configure database.", ex);
+            throw new DataAccessException("Unable to configure database.", ex);
         }    // throw new DataAccessException(DataAccessException.Code.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
     }
 }

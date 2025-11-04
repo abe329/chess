@@ -44,8 +44,9 @@ public class DatabaseManager {
      */
     static Connection getConnection() throws DataAccessException {
         try {
-            return DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
-        } catch (SQLException ex) {
+            Connection conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+            conn.setCatalog(databaseName); // ensure correct schema each time
+            return conn;        } catch (SQLException ex) {
             throw new DataAccessException("Error: failed to get connection", ex);
         }
     }
@@ -75,8 +76,8 @@ public class DatabaseManager {
         connectionUrl = String.format("jdbc:mysql://%s:%d/%s", host, port, databaseName);
     }
 
-    public static String getConnectionUrl() {
-        return connectionUrl;
+    public static String getBaseUrl() {
+        return baseUrl;
     }
     public static String getDatabaseName() {
         return databaseName;

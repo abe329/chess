@@ -8,11 +8,12 @@ public class ErrorResponse {
     private static final Gson GSON = new Gson();
 
     public static void sendError(Context ctx, String message) {
+        String lower = message.toLowerCase();
         int errorStatus = 500;
 
-        if (message.contains("bad request")) { errorStatus = 400; }
-        else if (message.contains("unauthorized")) { errorStatus = 401; }
-        else if (message.contains("already taken")) { errorStatus = 403; }
+        if (lower.contains("bad request")) { errorStatus = 400; }
+        else if (lower.contains("unauthorized")) { errorStatus = 401; }
+        else if (lower.contains("already taken") || lower.contains("forbidden")) { errorStatus = 403; }
 
         ctx.status(errorStatus).json(GSON.toJson(Map.of("message", message)));
     }
