@@ -1,7 +1,13 @@
 package ui;
 
+import com.google.gson.Gson;
 import model.requestsandresults.*;
-import java.net.http.HttpClient;
+
+import java.net.*;
+import java.net.http.*;
+import java.net.http.HttpRequest.BodyPublisher;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse.BodyHandlers;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -11,15 +17,87 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public UserResult register(RegisterRequest request) throws ClientException {...}
+    public UserResult register(RegisterRequest request) throws ClientException {
+        var built = buildRequest("POST", "/user", request);
+        var response = sendRequest(built);
+        return handleResponse(response, UserResult.class);
+    }
 
-    public UserResult login(LoginRequest request) throws ClientException {...}
+    public UserResult login(LoginRequest request) throws ClientException {
+        var built = buildRequest("POST", "/session", request);
+        var response = sendRequest(built);
+        return handleResponse(response, UserResult.class);
+    }
 
-    public UserResult logout(String authToken) throws ClientException { ... }
+    public UserResult logout(String authToken) throws ClientException {
+        var built = buildRequest("DELETE", "/session", authToken);
+        var response = sendRequest(built);
+        return handleResponse(response, UserResult.class);
+    }
 
-    public CreateGameResult createGame(CreateGameRequest request) throws ClientException {...}
+    public CreateGameResult createGame(CreateGameRequest request) throws ClientException {
+        var built = buildRequest("POST", "/game", request);
+        var response = sendRequest(built);
+        return handleResponse(response, CreateGameResult.class);
+    }
 
-    public ListGamesResult listGames(ListGamesRequest request) throws ClientException {...}
+    public ListGamesResult listGames(ListGamesRequest request) throws ClientException {
+        var built = buildRequest("GET", "/game", request);
+        var response = sendRequest(built);
+        return handleResponse(response, ListGamesResult.class);
+    }
 
-    public EmptyResult joinGame(JoinGameRequest request) throws ClientException {...}
+    public EmptyResult joinGame(JoinGameRequest request) throws ClientException {
+        var built = buildRequest("GET", "/game", request);
+        var response = sendRequest(built);
+        return handleResponse(response, EmptyResult.class);
+    }
+
+    private HttpRequest buildRequest(String method, String path, Object body) {
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + path))
+                .method(method, makeRequestBody(body));
+        if (body != null) {
+            request.setHeader("Content-Type", "application/json");
+        }
+        return request.build();
+    }
+
+    private BodyPublisher makeRequestBody(Object request) {
+        if (request != null) {
+            return BodyPublishers.ofString(new Gson().toJson(request));
+        } else {
+            return BodyPublishers.noBody();
+        }
+    }
+
+    private HttpResponse<String> sendRequest(HttpRequest request) throws ClientException {
+        try {
+            return client.send(request, BodyHandlers.ofString());
+        } catch (Exception ex) {
+            throw new ClientException(ex.getMessage());
+        }
+    }
+
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ClientException {
+        var status = response.statusCode();
+        if (!isSuccessful(status)) {
+            var body = response.body();
+            if (body != null) {
+                throw ClientException.fromJson(body);
+            }
+
+            throw new ClientException(status, ClientException.fromHttpStatusCode(status));
+        }
+
+        if (responseClass != null) {
+            return new Gson().fromJson(response.body(), responseClass);
+        }
+
+        return null;
+    }
+
+    private boolean isSuccessful(int status) {
+        return status / 100 == 2;
+    }
 }
