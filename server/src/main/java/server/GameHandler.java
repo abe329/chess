@@ -2,8 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import io.javalin.http.Context;
+import model.requestsandresults.*;
 import service.*;
-import service.requestsandresults.*;
 
 import java.util.Map;
 

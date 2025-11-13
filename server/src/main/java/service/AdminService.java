@@ -2,7 +2,7 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import service.requestsandresults.EmptyResult;
+import model.requestsandresults.EmptyResult;
 
 public class AdminService {
     private final DataAccess dataAccess;

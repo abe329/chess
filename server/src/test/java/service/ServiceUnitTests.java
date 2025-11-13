@@ -4,10 +4,10 @@ import dataaccess.MemoryDataAccess;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import service.requestsandresults.CreateGameRequest;
-import service.requestsandresults.JoinGameRequest;
-import service.requestsandresults.LoginRequest;
-import service.requestsandresults.RegisterRequest;
+import model.requestsandresults.CreateGameRequest;
+import model.requestsandresults.JoinGameRequest;
+import model.requestsandresults.LoginRequest;
+import model.requestsandresults.RegisterRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 

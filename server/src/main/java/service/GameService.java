@@ -5,7 +5,7 @@ import dataaccess.MemoryDataAccess;
 import dataaccess.DataAccessException;
 import model.GameData;
 import model.AuthData;
-import service.requestsandresults.*;
+import model.requestsandresults.*;
 // import java.util.UUID;
 
 import java.util.ArrayList;
