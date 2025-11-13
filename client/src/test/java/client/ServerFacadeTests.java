@@ -27,7 +27,10 @@ public class ServerFacadeTests {
         server.stop();
     }
 
-
+    @BeforeEach
+    public void clear() throws Exception {
+        facade.clear();
+    }
 
 
     @Test
@@ -149,7 +152,7 @@ public class ServerFacadeTests {
 
         var request = new JoinGameRequest("WHITE", game1.gameID());
 
-        var result = facade.joinGame(request);
+        var result = facade.joinGame(auth, request);
 
         Assertions.assertNotNull(result);
     }
@@ -163,7 +166,7 @@ public class ServerFacadeTests {
         var request = new JoinGameRequest("PURPLE", game.gameID()); // invalid
 
         Assertions.assertThrows(ClientException.class, () -> {
-            facade.joinGame(request);
+            facade.joinGame(auth, request);
         });
     }
 
