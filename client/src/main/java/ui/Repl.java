@@ -4,6 +4,8 @@ import java.util.Scanner;
 import static ui.EscapeSequences.*;
 import model.*;
 
+// Still need to connect this to main I think
+
 public class Repl {
     private Client client;
 
@@ -12,7 +14,7 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println("\u2003 Welcome to 240 Chess. Type Help to get started. \u2003");
+        System.out.println("\u2003 Welcome to Abe's Chess! Type \"help\" to get started. \u2003");
         // System.out.print(client1.help());
         Scanner scanner = new Scanner(System.in);
 
@@ -22,12 +24,10 @@ public class Repl {
             String line = scanner.nextLine();
             try {
                 var transition = client.eval(line);
-
                 System.out.print(transition.message());
 
                 if (transition.nextClient() != null) { client = transition.nextClient(); }
-
-                if (transition instanceof QuitTransition) { break; }
+                if (transition.nextClient() instanceof QuitClient) { break; }
 
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
@@ -37,6 +37,6 @@ public class Repl {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + RESET + ">>> " + GREEN);
+        System.out.print("\n" + RESET + ">>> " + GREEN); //Figured out how to use EscapeSequences here
     }
 }
