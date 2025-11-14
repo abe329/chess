@@ -69,7 +69,6 @@ public class InternalClient implements Client {
         return ClientStateTransition.switchTo("Joined game " + gameID + " as " + playerColor, next);
     }
 
-    // WRONG!!!! I THINK I NEED TO FIX A LOT OF CODE TO GET THIS TO WORK
     private ClientStateTransition observe(String[] tokens) throws ClientException {
         if (tokens.length < 1) {
             return ClientStateTransition.stay("Usage: observe <ID>");

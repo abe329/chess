@@ -10,11 +10,7 @@ import static ui.EscapeSequences.*;
 public class ChessboardRenderer {
     private final ChessGame game;
     private final boolean whitePerspective;
-    private static final String EMPTY = " ";
     private static final String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
-    private static Integer start;
-    private static Integer end;
-    private static Integer step;
 
     public ChessboardRenderer(ChessGame game, String playerColor) {
         this.game = game;
@@ -25,48 +21,51 @@ public class ChessboardRenderer {
         PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
         out.println();
+        drawHeaders(out);
 
         int start = whitePerspective ? 8 : 1;
         int end = whitePerspective ? 1 : 8;
         int step = whitePerspective ? -1 : 1;
 
-        drawHeaders(out);
-        drawHeaders(out);
-
-        out.print(SET_BG_COLOR_BLACK);
-        out.print(SET_TEXT_COLOR_WHITE);
-    }
-
-    private static void drawHeaders(PrintStream out) {
-        setBlack(out);
-        out.print(SET_TEXT_COLOR_WHITE);
-        drawBuffer(out);
-
         for (int rank = start; rank != end + step; rank += step) {
-            out.print(EMPTY);
-            out.print(letters[rank]);
-            out.print(EMPTY);
-            }
-        drawBuffer(out);
+            drawPieces(out, rank);
+        }
+
+        drawHeaders(out);
+        out.print(RESET);
     }
 
-    private static void drawBuffer(PrintStream out) {
-        out.print(EMPTY.repeat(3));
+    private void drawHeaders(PrintStream out) {
+        out.print("   ");
+        int start = whitePerspective ? 0 : 7;
+        int end = whitePerspective ? 7 : 0;
+        int step = whitePerspective ? 1 : -1;
+
+        for (int col = start; col != end + step; col += step) {
+            out.print("  " + SET_TEXT_COLOR_WHITE + letters[col] + "  ");
+        }
+
+        out.println(RESET);
     }
 
-    private static void setWhite(PrintStream out) {
-        out.print(SET_BG_COLOR_WHITE);
-        out.print(SET_TEXT_COLOR_WHITE);
+    private void drawPieces(PrintStream out, int rank) {
+        out.print(" " + SET_TEXT_COLOR_WHITE + rank + " " + RESET);
+
+        int start = whitePerspective ? 8 : 1;
+        int end = whitePerspective ? 1 : 8;
+        int step = whitePerspective ? -1 : 1;
+
+        for (int col = start; col != end + step; col += step) {
+            drawSquare(out, rank, col);
+        }
+
+        out.print(" " + SET_TEXT_COLOR_WHITE + rank + RESET);
+        out.println();
     }
 
-    private static void setRed(PrintStream out) {
-        out.print(SET_BG_COLOR_RED);
-        out.print(SET_TEXT_COLOR_RED);
-    }
-
-    private static void setBlack(PrintStream out) {
-        out.print(SET_BG_COLOR_BLACK);
-        out.print(SET_TEXT_COLOR_BLACK);
+    private void drawSquare(PrintStream out, int rank, int col) {
+        out.print("*");
+        out.print(RESET);
     }
 }
 
