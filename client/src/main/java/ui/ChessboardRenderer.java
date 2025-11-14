@@ -13,7 +13,7 @@ import static ui.EscapeSequences.*;
 public class ChessboardRenderer {
     private final ChessGame game;
     private final boolean whitePerspective;
-    private static final String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
+    private static final String[] Letters = {"a", "b", "c", "d", "e", "f", "g", "h"};
 
     public ChessboardRenderer(ChessGame game, String playerColor) {
         this.game = game;
@@ -45,7 +45,7 @@ public class ChessboardRenderer {
         int step = whitePerspective ? 1 : -1;
 
         for (int col = start; col != end + step; col += step) {
-            out.print(" " + SET_TEXT_COLOR_WHITE + letters[col] + " ");
+            out.print(" " + SET_TEXT_COLOR_WHITE + Letters[col] + " ");
         }
 
         out.println(RESET);

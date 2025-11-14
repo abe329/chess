@@ -138,7 +138,7 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("ListGames - Negative")
-    public void listGamesNegative_invalidAuth() {
+    public void listGamesNegative() {
         Assertions.assertThrows(ClientException.class, () -> {
             facade.listGames(new ListGamesRequest("badauth"));
         });
@@ -159,7 +159,7 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("joinGame - Negative")
-    public void joinGameNegative_badColor() throws Exception {
+    public void joinGameNegative() throws Exception {
         var auth = facade.register(new RegisterRequest("tom", "pw", "t@mail.com")).authToken();
         var game = facade.createGame(new CreateGameRequest(auth, "badColorGame"));
 
