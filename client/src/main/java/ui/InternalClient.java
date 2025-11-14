@@ -25,7 +25,7 @@ public class InternalClient implements Client {
             case "create" -> create(params);
             case "list" -> list();
             case "join" -> join(params);
-//            case "observe" -> observe(params);
+            case "observe" -> observe(params);
             case "logout" -> logout();
             case "help" -> ClientStateTransition.stay(help());
             case "quit" -> ClientStateTransition.quit("Adios good friend!");
@@ -33,8 +33,8 @@ public class InternalClient implements Client {
         };
     }
 
-    private ClientStateTransition create(String[] tokens) throws ClientException {
-        var gameName = tokens.length > 1 ? tokens[1] : prompt("Game Name: ");
+    private ClientStateTransition create(String[] params) throws ClientException {
+        var gameName = params.length >= 1 ? params[0] : prompt("Game Name: ");
 
         server.createGame(new CreateGameRequest(authToken, gameName));
         System.out.println("Successfully created game " + gameName);
@@ -48,26 +48,47 @@ public class InternalClient implements Client {
         return ClientStateTransition.stay("");
     }
 
-    private ClientStateTransition join(String[] tokens) throws ClientException {
-        var gameID = Integer.valueOf(tokens.length > 1 ? tokens[1] : prompt("Game ID: "));
-        var playerColor = tokens.length > 1 ? tokens[1] : prompt("Player Color: ");
+    private ClientStateTransition join(String[] params) throws ClientException {
+        if (params.length < 2) {
+            return ClientStateTransition.stay("Usage: join <ID> <WHITE|BLACK>");
+        }
 
-        server.joinGame(authToken, new JoinGameRequest(playerColor.toUpperCase(), gameID));
-        var post = new GameplayClient(server, authToken, username, gameID);
-        return ClientStateTransition.switchTo(String.format("Logged in as %s", username), post);
+        Integer gameID;
+        try {
+            gameID = Integer.parseInt(params[1]);
+        } catch (NumberFormatException e) {
+            return ClientStateTransition.stay("Game ID must be a number.");
+        }
+        var playerColor = params[1].toUpperCase();
+        if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
+            return ClientStateTransition.stay("Color must be WHITE or BLACK.");
+        }
+
+        server.joinGame(authToken, new JoinGameRequest(playerColor, gameID));
+        var next = new GameplayClient(server, authToken, username, gameID, playerColor);
+        return ClientStateTransition.switchTo("Joined game " + gameID + " as " + playerColor, next);
     }
 
     // WRONG!!!! I THINK I NEED TO FIX A LOT OF CODE TO GET THIS TO WORK
     private ClientStateTransition observe(String[] tokens) throws ClientException {
-        var gameID = Integer.valueOf(tokens.length > 1 ? tokens[1] : prompt("Game ID: "));
-        server.joinGame(authToken, new JoinGameRequest("WHITE", gameID));
-        var post = new GameplayClient(server, authToken, username, gameID);
-        return ClientStateTransition.switchTo("Observing game " + gameID, post);
+        if (tokens.length < 1) {
+            return ClientStateTransition.stay("Usage: observe <ID>");
+        }
+
+        int gameID;
+        try {
+            gameID = Integer.parseInt(tokens[0]);
+        } catch (NumberFormatException e) {
+            return ClientStateTransition.stay("Game ID must be a number.");
+        }
+        var next = new GameplayClient(server, authToken, username, gameID, "WHITE");
+        return ClientStateTransition.switchTo("Observing game " + gameID, next);
     }
 
     private ClientStateTransition logout() throws ClientException {
         server.logout(authToken);
-        return ClientStateTransition.quit("Successfully logged out.");
+        var next = new ExternalClient(server.getServerUrl());
+        return ClientStateTransition.switchTo("Successfully logged out.", next);
     }
 
     @Override
