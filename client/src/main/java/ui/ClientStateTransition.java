@@ -13,8 +13,3 @@ public record ClientStateTransition(String message, Client nextClient) {
         return new ClientStateTransition(message, new QuitClient());
     }
 }
-
-class QuitClient implements Client {
-    @Override public ClientStateTransition eval(String input) { return null; }
-    @Override public String help() { return null; }
-}

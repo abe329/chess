@@ -37,7 +37,7 @@ public class InternalClient implements Client {
         var gameName = params.length >= 1 ? params[0] : prompt("Game Name: ");
         server.createGame(new CreateGameRequest(authToken, gameName));
 
-        return ClientStateTransition.stay("Successfully created game " + gameName);
+        return ClientStateTransition.stay("Successfully created game: " + gameName);
     }
 
     private ClientStateTransition list() throws ClientException {
