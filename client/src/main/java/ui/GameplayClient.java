@@ -1,5 +1,7 @@
 package ui;
 
+import chess.ChessGame;
+
 public class GameplayClient implements Client{
     private final ServerFacade server;
     private final String authToken;
@@ -13,6 +15,16 @@ public class GameplayClient implements Client{
         this.username = username;
         this.gameID = gameID;
         this.color = color;
+
+        try {
+            ChessGame game = getGame();
+            ChessboardRenderer renderer = new ChessboardRenderer(game, color);
+            renderer.displayBoard();
+        } catch (Exception e) {
+            System.out.println("Error displaying board: " + e.getMessage());
+        }
+
+        System.out.println("Press enter to return to menu...");
     }
 
     @Override
@@ -24,5 +36,10 @@ public class GameplayClient implements Client{
     @Override
     public String help() {
         return "Not implemented yet";
+    }
+
+    private ChessGame getGame() {
+        // change this part later
+        return new ChessGame();
     }
 }

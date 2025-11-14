@@ -35,17 +35,31 @@ public class InternalClient implements Client {
 
     private ClientStateTransition create(String[] params) throws ClientException {
         var gameName = params.length >= 1 ? params[0] : prompt("Game Name: ");
-
         server.createGame(new CreateGameRequest(authToken, gameName));
-        System.out.println("Successfully created game " + gameName);
 
-        return ClientStateTransition.stay("");
+        return ClientStateTransition.stay("Successfully created game " + gameName);
     }
 
     private ClientStateTransition list() throws ClientException {
         var result = server.listGames(new ListGamesRequest(authToken));
-        System.out.println(result);
-        return ClientStateTransition.stay("");
+        if (result == null || result.games() == null || result.games().isEmpty()) {
+            return ClientStateTransition.stay("No games found.");
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nCurrent Games:\n");
+
+        int index = 1;
+        for (var g : result.games()) {
+            sb.append(String.format(
+                    "%d. Game name: %s    White: %s    Black: %s\n",
+                    index++,
+                    g.gameName(),
+                    g.whiteUsername() == null ? "-" : g.whiteUsername(),
+                    g.blackUsername() == null ? "-" : g.blackUsername()
+            ));
+        }
+
+        return ClientStateTransition.stay(sb.toString());
     }
 
     private ClientStateTransition join(String[] params) throws ClientException {
@@ -55,7 +69,7 @@ public class InternalClient implements Client {
 
         Integer gameID;
         try {
-            gameID = Integer.parseInt(params[1]);
+            gameID = Integer.parseInt(params[0]);
         } catch (NumberFormatException e) {
             return ClientStateTransition.stay("Game ID must be a number.");
         }

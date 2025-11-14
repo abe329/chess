@@ -18,7 +18,7 @@ public class ExternalClient implements Client {
         var params = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch (cmd) {
             case "login" -> login(params);
-            // case "register" -> register(params);
+            case "register" -> register(params);
             case "help" -> ClientStateTransition.stay(help());
             case "quit" -> ClientStateTransition.quit("Adios good friend!");
             default -> ClientStateTransition.stay("Unknown command. Type help.");
@@ -37,8 +37,8 @@ public class ExternalClient implements Client {
     }
 
     private ClientStateTransition login(String[] tokens) throws ClientException {
-        var username = tokens.length > 1 ? tokens[1] : prompt("Username: ");
-        var password = tokens.length > 2 ? tokens[2] : prompt("Password: ");
+        var username = tokens.length >= 1 ? tokens[0] : prompt("Username: ");
+        var password = tokens.length >= 2 ? tokens[1] : prompt("Password: ");
 
         var result = server.login(new LoginRequest(username, password));
         var post = new InternalClient(server, result.authToken(), username);
@@ -47,9 +47,9 @@ public class ExternalClient implements Client {
     }
 
     private ClientStateTransition register(String[] tokens) throws ClientException {
-        var username = tokens.length > 1 ? tokens[1] : prompt("Username: ");
-        var password = tokens.length > 2 ? tokens[2] : prompt("Password: ");
-        var email = tokens.length > 3 ? tokens[3] : prompt("Email: ");
+        var username = tokens.length >= 1 ? tokens[0] : prompt("Username: ");
+        var password = tokens.length >= 2 ? tokens[1] : prompt("Password: ");
+        var email = tokens.length >= 3 ? tokens[2] : prompt("Email: ");
 
         var result = server.register(new RegisterRequest(username, password, email));
         var post = new InternalClient(server, result.authToken(), username);

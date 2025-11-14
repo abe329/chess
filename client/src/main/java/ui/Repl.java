@@ -14,8 +14,7 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println("\u2003 Welcome to Abe's Chess! Type \"help\" to get started. \u2003");
-        // System.out.print(client1.help());
+        System.out.println("\u2003 Welcome to Abe's Chess Project! Type \"help\" to get started. \u2003");
         Scanner scanner = new Scanner(System.in);
 
         // var result = "";
@@ -30,7 +29,7 @@ public class Repl {
                 if (transition.nextClient() instanceof QuitClient) { break; }
 
             } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
+                System.out.println(e.getMessage());
             }
         }
         System.out.println();
