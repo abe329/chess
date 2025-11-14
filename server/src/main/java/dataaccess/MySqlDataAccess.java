@@ -317,6 +317,6 @@ public class MySqlDataAccess implements DataAccess {
             // System.err.println("SQLException occurred: " + ex.getMessage());
             ex.printStackTrace();  // This will show the detailed reason for failure
             throw new DataAccessException("Unable to configure database.", ex);
-        }    // throw new DataAccessException(DataAccessException.Code.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
+        }
     }
 }

@@ -111,15 +111,23 @@ public class ChessGame {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition pos = new ChessPosition(i,j);
                 ChessPiece piece = board.getPiece(pos);
-                if (piece != null && piece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> moves = piece.pieceMoves(board, pos);
 
-                    for (ChessMove move : moves) {
-                        if (move.getEndPosition().equals(kingPos)) { // AHHH the whole point of changing equals was to not have this problem.
-                            return true;
-                        }
-                    }
+                if (isEnemy(piece, teamColor) && attackingKing(piece, pos, kingPos)) {
+                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean isEnemy(ChessPiece piece, TeamColor teamColor) {
+        return piece != null && piece.getTeamColor() != teamColor;
+    }
+
+    private boolean attackingKing(ChessPiece piece, ChessPosition pos, ChessPosition kingPos) {
+        for (ChessMove move : piece.pieceMoves(board, pos)) {
+            if (move.getEndPosition().equals(kingPos)) {
+                return true;
             }
         }
         return false;

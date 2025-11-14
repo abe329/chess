@@ -88,14 +88,6 @@ public class ServerFacade {
         return handleResponse(response, EmptyResult.class);
     }
 
-    private BodyPublisher makeRequestBody(Object request) {
-        if (request != null) {
-            return BodyPublishers.ofString(new Gson().toJson(request));
-        } else {
-            return BodyPublishers.noBody();
-        }
-    }
-
     private HttpResponse<String> sendRequest(HttpRequest request) throws ClientException {
         try {
             return client.send(request, BodyHandlers.ofString());
