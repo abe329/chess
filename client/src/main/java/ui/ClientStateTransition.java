@@ -15,6 +15,6 @@ public record ClientStateTransition(String message, Client nextClient) {
 }
 
 class QuitClient implements Client {
-    @Override public ClientStateTransition eval(String in) { return null; }
+    @Override public ClientStateTransition eval(String input) { return null; }
     @Override public String help() { return null; }
 }

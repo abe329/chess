@@ -29,10 +29,10 @@ public class ExternalClient implements Client {
     public String help() {
         return """
             Commands:
-              register
-              login
-              quit
-              help
+              register <USERNAME> <PASSWORD> <EMAIL> - create an account
+              login <USERNAME> <PASSWORD> - login to play chess
+              quit - stop playing chess
+              help - list of possible commands
             """;
     }
 
