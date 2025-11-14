@@ -94,6 +94,15 @@ public class InternalClient implements Client {
         } catch (NumberFormatException e) {
             return ClientStateTransition.stay("Game ID must be a number.");
         }
+
+        var result = server.listGames(new ListGamesRequest(authToken));
+        var games = result.games();
+
+        boolean exists = games.stream().anyMatch(g -> g.gameID() == gameID);
+        if (!exists) {
+            return ClientStateTransition.stay("Game " + gameID + " does not exist.");
+        }
+
         var next = new GameplayClient(server, authToken, username, gameID, "WHITE");
         return ClientStateTransition.switchTo("Observing game " + gameID, next);
     }

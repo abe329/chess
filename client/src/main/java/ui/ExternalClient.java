@@ -37,6 +37,9 @@ public class ExternalClient implements Client {
     }
 
     private ClientStateTransition login(String[] tokens) throws ClientException {
+        if (tokens.length > 2) {
+            return ClientStateTransition.stay("Usage: login <USERNAME> <PASSWORD>");
+        }
         var username = tokens.length >= 1 ? tokens[0] : prompt("Username: ");
         var password = tokens.length >= 2 ? tokens[1] : prompt("Password: ");
 
@@ -47,6 +50,9 @@ public class ExternalClient implements Client {
     }
 
     private ClientStateTransition register(String[] tokens) throws ClientException {
+        if (tokens.length > 3) {
+            return ClientStateTransition.stay("Usage: register <USERNAME> <PASSWORD> <EMAIL>");
+        }
         var username = tokens.length >= 1 ? tokens[0] : prompt("Username: ");
         var password = tokens.length >= 2 ? tokens[1] : prompt("Password: ");
         var email = tokens.length >= 3 ? tokens[2] : prompt("Email: ");

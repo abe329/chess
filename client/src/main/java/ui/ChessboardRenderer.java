@@ -40,12 +40,14 @@ public class ChessboardRenderer {
 
     private void drawHeaders(PrintStream out) {
         out.print("    ");
-        int start = whitePerspective ? 0 : 7;
-        int end = whitePerspective ? 7 : 0;
-        int step = whitePerspective ? 1 : -1;
-
-        for (int col = start; col != end + step; col += step) {
-            out.print(" " + SET_TEXT_COLOR_WHITE + LETTERS[col] + " ");
+        if (whitePerspective) {
+            for (int col = 0; col < 8; col++) {
+                out.print(" " + SET_TEXT_COLOR_WHITE + LETTERS[col] + " ");
+            }
+        } else {
+            for (int col = 7; col >= 0; col--) {
+                out.print(" " + SET_TEXT_COLOR_WHITE + LETTERS[col] + " ");
+            }
         }
 
         out.println(RESET);
@@ -54,12 +56,14 @@ public class ChessboardRenderer {
     private void drawPieces(PrintStream out, int row) {
         out.print("  " + SET_TEXT_COLOR_WHITE + row + " " + RESET);
 
-        int start = whitePerspective ? 8 : 1;
-        int end = whitePerspective ? 1 : 8;
-        int step = whitePerspective ? -1 : 1;
-
-        for (int col = start; col != end + step; col += step) {
-            drawSquare(out, row, col);
+        if (whitePerspective) {
+            for (int col = 1; col <= 8; col++) {
+                drawSquare(out, row, col);
+            }
+        } else {
+            for (int col = 8; col >= 1; col--) {
+                drawSquare(out, row, col);
+            }
         }
 
         out.print(" " + SET_TEXT_COLOR_WHITE + row + RESET);
@@ -67,8 +71,8 @@ public class ChessboardRenderer {
     }
 
     private void drawSquare(PrintStream out, int row, int col) {
-        boolean lightSquare = (row + col) % 2 == 0;
-        String bg = lightSquare ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+        boolean darkSquare = (row + col) % 2 == 0;
+        String bg = darkSquare ? SET_BG_COLOR_DARK_BROWN : SET_BG_COLOR_LIGHT_BROWN;
         out.print(bg);
 
         ChessPosition pos = new ChessPosition(row, col);
@@ -77,7 +81,7 @@ public class ChessboardRenderer {
         if (piece == null) {
             out.print(EMPTY);
         } else {
-            String txt = piece.getTeamColor() == WHITE ? SET_TEXT_COLOR_BLUE : SET_TEXT_COLOR_MAGENTA;
+            String txt = piece.getTeamColor() == WHITE ? SET_TEXT_COLOR_WHITE : SET_TEXT_COLOR_DARK_GREY;
             out.print(txt + codedPiece(piece));
         }
 
