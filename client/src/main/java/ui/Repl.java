@@ -1,12 +1,11 @@
 package ui;
 
 import java.util.Scanner;
-import static java.awt.Color.BLUE;
+import static ui.EscapeSequences.*;
 import model.*;
 
 public class Repl {
     private Client client;
-
 
     public Repl(String serverUrl) {
         this.client = new ExternalClient(serverUrl);

@@ -7,6 +7,10 @@ public class EscapeSequences {
 
     private static final String UNICODE_ESCAPE = "\u001b";
     private static final String ANSI_ESCAPE = "\033";
+    public static final String GREEN = UNICODE_ESCAPE + "[32m";
+    public static final String BLUE = UNICODE_ESCAPE + "[34m";
+    public static final String RED = UNICODE_ESCAPE + "[31m";
+    public static final String RESET = UNICODE_ESCAPE + "[0m";
 
     public static final String ERASE_SCREEN = UNICODE_ESCAPE + "[H" + UNICODE_ESCAPE + "[2J";
     public static final String ERASE_LINE = UNICODE_ESCAPE + "[2K";
