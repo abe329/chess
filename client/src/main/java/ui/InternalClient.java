@@ -26,7 +26,7 @@ public class InternalClient implements Client {
             case "list" -> list();
             case "join" -> join(params);
 //            case "observe" -> observe(params);
-//            case "logout" -> logout();
+            case "logout" -> logout();
             case "help" -> ClientStateTransition.stay(help());
             case "quit" -> ClientStateTransition.quit("Adios good friend!");
             default -> ClientStateTransition.stay("Unknown command. Type help.");
@@ -52,9 +52,22 @@ public class InternalClient implements Client {
         var gameID = Integer.valueOf(tokens.length > 1 ? tokens[1] : prompt("Game ID: "));
         var playerColor = tokens.length > 1 ? tokens[1] : prompt("Player Color: ");
 
-        server.joinGame(authToken, new JoinGameRequest(playerColor, gameID));
+        server.joinGame(authToken, new JoinGameRequest(playerColor.toUpperCase(), gameID));
         var post = new GameplayClient(server, authToken, username, gameID);
         return ClientStateTransition.switchTo(String.format("Logged in as %s", username), post);
+    }
+
+    // WRONG!!!! I THINK I NEED TO FIX A LOT OF CODE TO GET THIS TO WORK
+    private ClientStateTransition observe(String[] tokens) throws ClientException {
+        var gameID = Integer.valueOf(tokens.length > 1 ? tokens[1] : prompt("Game ID: "));
+        server.joinGame(authToken, new JoinGameRequest("WHITE", gameID));
+        var post = new GameplayClient(server, authToken, username, gameID);
+        return ClientStateTransition.switchTo("Observing game " + gameID, post);
+    }
+
+    private ClientStateTransition logout() throws ClientException {
+        server.logout(authToken);
+        return ClientStateTransition.quit("Successfully logged out.");
     }
 
     @Override
