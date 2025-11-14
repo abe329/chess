@@ -14,7 +14,7 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println("\u2003 Welcome to Abe's Chess Project! Type \"help\" to get started. \u2003");
+        System.out.println("♖ Welcome to Abe's Chess Project! Type \"help\" to get started. ♖");
         Scanner scanner = new Scanner(System.in);
 
         // var result = "";
