@@ -1,20 +1,26 @@
 package ui;
 
 import chess.ChessGame;
+import exceptions.ResponseException;
+import websocket.MessageHandler;
+import websocket.WebSocketFacade;
+import websocket.messages.ServerMessage;
 
-public class GameplayClient implements Client{
+public class GameplayClient implements Client, MessageHandler {
     private final ServerFacade server;
     private final String authToken;
     private final String username;
     private final Integer gameID;
     private final String color;
+    private final WebSocketFacade ws;
 
-    public GameplayClient(ServerFacade serverUrl, String authToken, String username, Integer gameID, String color) {
+    public GameplayClient(ServerFacade serverUrl, String authToken, String username, Integer gameID, String color) throws ResponseException {
         this.server = serverUrl;
         this.authToken = authToken;
         this.username = username;
         this.gameID = gameID;
         this.color = color;
+        this.ws = new WebSocketFacade(serverUrl.getServerUrl(), this);
 
         try {
             ChessGame game = getGame();
@@ -25,6 +31,15 @@ public class GameplayClient implements Client{
         }
 
         System.out.println("Press enter to return to menu...");
+    }
+
+    @Override
+    public void notify(ServerMessage msg) {
+        switch(msg.getServerMessageType()) {
+//            case LOAD_GAME -> handleLoadGame(msg);
+//            case NOTIFICATION -> handleNotification(msg);
+//            case ERROR -> handleError(msg);
+        }
     }
 
     @Override
