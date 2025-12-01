@@ -35,7 +35,15 @@ public class GameplayClient implements Client{
 
     @Override
     public String help() {
-        return "Not implemented yet";
+        return """
+            Commands:
+                move <START POSITION> <END POSITION>
+                resign
+                leave
+                redraw
+                legal <PIECE POSITION>
+                help
+            """;
     }
 
     private ChessGame getGame() {
