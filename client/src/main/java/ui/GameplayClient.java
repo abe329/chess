@@ -2,10 +2,11 @@ package ui;
 
 import chess.ChessGame;
 import exceptions.ResponseException;
+import model.GameData;
 import websocket.MessageHandler;
 import websocket.WebSocketFacade;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
+import websocket.messages.*;
 
 public class GameplayClient implements Client, MessageHandler {
     private final ServerFacade server;
@@ -14,6 +15,9 @@ public class GameplayClient implements Client, MessageHandler {
     private final Integer gameID;
     private final String color;
     private final WebSocketFacade ws;
+    private ChessboardRenderer renderer;
+    private GameData currentGame;  // whatever server sends as game
+
 
     public GameplayClient(ServerFacade serverUrl, String authToken, String username, Integer gameID, String color) throws ResponseException {
         this.server = serverUrl;
@@ -33,7 +37,7 @@ public class GameplayClient implements Client, MessageHandler {
                     gameID
             );
 
-            ws.send(connect);
+            ws.send(connect); // IS THIS RIGHT??
         } catch (Exception e) {
             System.out.println("Error displaying board: " + e.getMessage());
         }
@@ -44,10 +48,29 @@ public class GameplayClient implements Client, MessageHandler {
     @Override
     public void notify(ServerMessage msg) {
         switch(msg.getServerMessageType()) {
-//            case LOAD_GAME -> loadGame(msg);
-//            case NOTIFICATION -> handleNotification(msg);
-//            case ERROR -> handleError(msg);
+            case LOAD_GAME -> {
+                LoadGameMessage gm = (LoadGameMessage) msg;
+                loadGame(gm.getGame());
+            }
+            case NOTIFICATION -> {
+                NotificationMessage nm = (NotificationMessage) msg;
+                System.out.println("> " + nm.getMessage());
+            }
+            case ERROR -> {
+                ErrorMessage em = (ErrorMessage) msg;
+                System.out.println("ERROR: " + em.getErrorMessage());
+            }
         }
+    }
+
+    public void loadGame(GameData gdata) {
+        this.currentGame = gdata;
+        if (renderer == null) {
+            renderer = new ChessboardRenderer(currentGame.getGame(), color);
+        } else {
+            renderer = new ChessboardRenderer(currentGame.getGame(), color);
+        }
+        renderer.displayBoard();
     }
 
     @Override

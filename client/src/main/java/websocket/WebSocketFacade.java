@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 import websocket.commands.UserGameCommand;
 
@@ -29,13 +32,20 @@ public class WebSocketFacade extends Endpoint {
             //set message handler
             this.session.addMessageHandler(new jakarta.websocket.MessageHandler.Whole<String>() {
                 @Override
-                public void onMessage(String message) {
-                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-                    messageHandler.notify(notification);
+                public void onMessage(String json) {
+                    ServerMessage base = gson.fromJson(json, ServerMessage.class);
+                    ServerMessage fullMessage;
+                    switch (base.getServerMessageType()) {
+                        case LOAD_GAME -> fullMessage = gson.fromJson(json, LoadGameMessage.class);
+                        case ERROR -> fullMessage = gson.fromJson(json, ErrorMessage.class);
+                        case NOTIFICATION -> fullMessage = gson.fromJson(json, NotificationMessage.class);
+                        default -> throw new IllegalStateException("Unexpected message type");
+                    }
+                    messageHandler.notify(fullMessage);
                 }
             });
-        } catch (DeploymentException | IOException | URISyntaxException ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        } catch (Exception e) {
+            throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
         }
     }
 
@@ -44,7 +54,22 @@ public class WebSocketFacade extends Endpoint {
         //Endpoint requires this method, but PetShop says I don't have to do anything
     }
 
-    public void connect(UserGameCommand command) throws ResponseException{
+//    public void connect(UserGameCommand command) throws ResponseException {
+//        try {
+//            if (session == null || !session.isOpen()) {
+//                throw new ResponseException(
+//                        ResponseException.Code.ServerError,
+//                        "Websocket session is closed."
+//                );
+//            }
+//            String json = gson.toJson(command);
+//            session.getBasicRemote().sendText(json);
+//        } catch (IOException e) {
+//               throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
+//        }
+//    }
+
+    public void send(UserGameCommand command) throws ResponseException {
         try {
             if (session == null || !session.isOpen()) {
                 throw new ResponseException(
@@ -52,15 +77,6 @@ public class WebSocketFacade extends Endpoint {
                         "Websocket session is closed."
                 );
             }
-            String json = gson.toJson(command);
-            session.getBasicRemote().sendText(json);
-        } catch (IOException e) {
-               throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
-        }
-    }
-
-    public void send(UserGameCommand command) throws ResponseException{
-        try {
             String json = gson.toJson(command);
             session.getBasicRemote().sendText(json);
         } catch (IOException e) {
