@@ -92,4 +92,17 @@ public class GameService {
         }
 
     }
+
+    public GameData getGame(int gameID) throws ServiceException {
+        try {
+            GameData game = dataAccess.getGame(gameID);
+            if (game == null) {
+                throw new ServiceException("Error: bad gameID");
+            }
+            return game;
+        } catch (DataAccessException e) {
+            throw new ServiceException("Error: " + e.getMessage());
+        }
+    }
+
 }

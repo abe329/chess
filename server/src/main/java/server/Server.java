@@ -7,24 +7,19 @@ import io.javalin.*;
 import service.AdminService;
 import service.GameService;
 import service.UserService;
+import websocket.WebSocketServer;
 
 public class Server {
 
     private final Javalin javalin;
 
     public Server() {
-        // System.out.println(">>> STARTING NEW SERVER INSTANCE <<< " + this);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
-
-        // Register your endpoints and exception handlers here.
-        // DataAccess dataAccess = new MemoryDataAccess(); //probs gonna change this in the next phase!
         DataAccess dataAccess;
         try {
             dataAccess = new MySqlDataAccess();
-            // System.out.println("Using MySQL database for persistence");
         } catch (Exception e) {
-            // System.out.println("MySQL not available.");
             e.printStackTrace();
             dataAccess = new MemoryDataAccess();
         }
@@ -32,6 +27,10 @@ public class Server {
         AdminHandler adminHandler = new AdminHandler(new AdminService(dataAccess));
         UserHandler userHandler = new UserHandler(new UserService(dataAccess));
         GameHandler gameHandler = new GameHandler(new GameService(dataAccess));
+
+        var userService = new UserService(dataAccess);
+        var gameService = new GameService(dataAccess);
+        var WebSocketServer = new WebSocketServer(userService, gameService);
 
 
         javalin.delete("/db", adminHandler::clear);
@@ -41,6 +40,12 @@ public class Server {
         javalin.post("/game", gameHandler::createGame);
         javalin.get("/game", gameHandler::listGames);
         javalin.put("/game", gameHandler::joinGame);
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(WebSocketServer);
+            ws.onMessage(WebSocketServer);
+            ws.onClose(WebSocketServer);
+        });
+
     }
 
     public int run(int desiredPort) {

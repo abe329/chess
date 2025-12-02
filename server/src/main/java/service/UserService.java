@@ -75,4 +75,16 @@ public class UserService {
             throw new ServiceException("Error: " + e.getMessage());
         }
     }
+
+    public String authenticate(String authToken) throws ServiceException {
+        try {
+            AuthData auth = dataAccess.getAuth(authToken);
+            if (auth == null) {
+                throw new ServiceException("Error: unauthorized");
+            }
+            return auth.username();
+        } catch (DataAccessException e) {
+            throw new ServiceException("Error: " + e.getMessage());
+        }
+    }
 }
