@@ -17,4 +17,5 @@ public interface DataAccess {
     GameData getGame(Integer gameID) throws DataAccessException;
     Map<Integer, GameData> listGames(String authToken) throws DataAccessException;
     void joinGame(GameData game) throws DataAccessException;
+    void updateGame(GameData game) throws DataAccessException;
 }

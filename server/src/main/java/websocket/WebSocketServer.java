@@ -1,5 +1,8 @@
 package websocket;
 
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
 import model.AuthData;
@@ -7,9 +10,11 @@ import model.GameData;
 import service.GameService;
 import service.ServiceException;
 import service.UserService;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
 import com.google.gson.Gson;
 import websocket.messages.*;
+
+import static chess.ChessGame.TeamColor.*;
 
 public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -35,7 +40,10 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
         UserGameCommand command = gson.fromJson(json, UserGameCommand.class);
         switch (command.getCommandType()) {
             case CONNECT -> onConnect(ctx, command);
-            case MAKE_MOVE -> onMakeMove(ctx, command);
+            case MAKE_MOVE -> {
+                MakeMoveCommand mcommand = gson.fromJson(json, MakeMoveCommand.class);
+                onMakeMove(ctx, mcommand);
+            }
             case LEAVE -> onLeave(ctx, command);
             case RESIGN -> onResign(ctx, command);
         }
@@ -50,26 +58,37 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
         String auth = cmd.getAuthToken();
         int gameID = cmd.getGameID();
         try {
-            // 1. validate the token
+            // authenticate the token
             String username = userService.authenticate(auth);
 
-            // 2. validate game exists
+            // validate game exists
             GameData game = gameService.getGame(gameID);
             if (game == null) {
                 sendError(ctx, "Error: bad gameID");
                 return;
             }
 
-            // 3. Add connection to ConnectionManager
+            // Add connection
             connections.addConnection(gameID, username, ctx);
 
-            // 4. Send LOAD_GAME back to this user
+            //Send loadGame back to this user
             LoadGameMessage load = new LoadGameMessage(game);
             ctx.send(gson.toJson(load));
 
-            // 5. Send NOTIFICATION to others
+            // Send notificiation to others
+            String role;
+
+            if (username.equals(game.whiteUsername())) {
+                role = "joined as white";
+            } else if (username.equals(game.blackUsername())) {
+                role = "joined as black";
+            } else {
+                role = "joined as observer";
+            }
+
             NotificationMessage note =
-                    new NotificationMessage(username + " joined the game");
+                    new NotificationMessage(username + " " + role);
+
 
             broadcastToOthers(gameID, ctx, note);
 
@@ -78,16 +97,140 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
         }
     }
 
-    private void onMakeMove(WsContext ctx, UserGameCommand cmd) {
-        // TODO: update game + broadcast
+    private void onMakeMove(WsContext ctx, MakeMoveCommand cmd) {
+        try {
+            //Authenticate auth token
+            String auth = cmd.getAuthToken();
+            if (auth == null) {
+                sendError(ctx, "Error: unauthorized");
+                return;
+            }
+            String username = userService.authenticate(auth);
+
+            // Check game
+            GameData game = gameService.getGame(cmd.getGameID());
+            if (game == null) {
+                sendError(ctx, "Error: bad gameID");
+                return;
+            }
+
+            ChessGame chess = game.game(); // You store an actual ChessGame object
+
+            // Check turn
+            var whoseTurn = chess.getTeamTurn();
+            boolean userIsWhite = username.equals(game.whiteUsername());
+            boolean userIsBlack = username.equals(game.blackUsername());
+
+            if (whoseTurn == ChessGame.TeamColor.WHITE && !userIsWhite
+                    || whoseTurn == ChessGame.TeamColor.BLACK && !userIsBlack) {
+                sendError(ctx, "Error: not your turn");
+                return;
+            }
+
+            // Validate move
+            ChessMove move = cmd.getMove();
+            var legalMoves = chess.validMoves(move.getStartPosition());
+
+            if (!legalMoves.contains(move)) {
+                sendError(ctx, "Error: illegal move");
+                return;
+            }
+
+            // Apply move
+            chess.makeMove(move);
+
+            // Update game
+            GameData updated = new GameData(
+                    game.gameID(),
+                    game.whiteUsername(),
+                    game.blackUsername(),
+                    game.gameName(),
+                    chess
+            );
+            gameService.updateGame(updated);
+
+            // Send updated board to ALL
+            LoadGameMessage loadMsg = new LoadGameMessage(updated);
+            broadcastToAll(cmd.getGameID(), loadMsg);
+
+            // Send notification to others
+            NotificationMessage note = new NotificationMessage(
+                    username + " moved " + move.toString()
+            );
+            broadcastToOthers(cmd.getGameID(), ctx, note);
+
+            // Check/mate notifications
+            if (chess.isInCheck(whoseTurn == WHITE ? BLACK : WHITE)) {
+                String msg = (whoseTurn == WHITE ? game.blackUsername() : game.whiteUsername()) + " is in check";
+                NotificationMessage checkNote = new NotificationMessage(msg);
+                broadcastToOthers(cmd.getGameID(), ctx, checkNote); //MAYBE CHANGE THIS
+            }
+
+            if (chess.isInCheckmate(WHITE) || chess.isInCheckmate(BLACK)) {
+                String loser = chess.isInCheckmate(WHITE) ? game.whiteUsername() : game.blackUsername();
+                NotificationMessage cm = new NotificationMessage(loser + " is checkmated");
+                broadcastToOthers(cmd.getGameID(), ctx, cm); // MAYBE CHANGE THIS
+            }
+
+        } catch (Exception ex) {
+            sendError(ctx, "Error: " + ex.getMessage());
+        }
     }
 
     private void onLeave(WsContext ctx, UserGameCommand cmd) {
-        // TODO: broadcast
+        try {
+            String username = userService.authenticate(cmd.getAuthToken());
+            GameData game = gameService.getGame(cmd.getGameID());
+            if (game == null) {
+                sendError(ctx, "Error: bad gameID");
+                return;
+            }
+
+            int gameID = cmd.getGameID();
+
+            connections.removeConnection(ctx);
+            NotificationMessage note = new NotificationMessage(username + " left the game");
+            broadcastToOthers(gameID, ctx, note);
+
+        } catch (Exception e) {
+            sendError(ctx, "Error: " + e.getMessage());
+        }
     }
 
     private void onResign(WsContext ctx, UserGameCommand cmd) {
-        // TODO: broadcast
+        try {
+            String username = userService.authenticate(cmd.getAuthToken());
+            GameData game = gameService.getGame(cmd.getGameID());
+            if (game == null) {
+                sendError(ctx, "Error: bad gameID");
+                return;
+            }
+            boolean isPlayer =
+                    username.equals(game.whiteUsername()) ||
+                            username.equals(game.blackUsername());
+
+            if (!isPlayer) {
+                sendError(ctx, "Error: observers cannot resign");
+                return;
+            }
+
+            ChessGame chess = game.game();
+            chess.setGameOver(true);
+            GameData updated = new GameData(
+                    game.gameID(),
+                    game.whiteUsername(),
+                    game.blackUsername(),
+                    game.gameName(),
+                    chess
+            );
+            gameService.updateGame(updated);
+
+            NotificationMessage nm = new NotificationMessage(username + " resigned.");
+            broadcastToAll(game.gameID(), nm);
+
+        } catch (Exception e){
+            sendError(ctx, "Error: " + e.getMessage());
+        }
     }
 
     private void broadcastToOthers(int gameID, WsContext exclude, ServerMessage msg) {
@@ -99,6 +242,18 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             }
         }
     }
+
+    private void broadcastToAll(int gameID, ServerMessage msg) {
+        var json = gson.toJson(msg);
+        for (WsContext c : connections.getConnections(gameID)) {
+            c.send(json);
+        }
+    }
+
+    private String moveToString(ChessMove move) {
+        return move.getStartPosition() + " → " + move.getEndPosition();
+    }
+
 
     private void sendError(WsContext ctx, String message) {
         ErrorMessage err = new ErrorMessage(message);

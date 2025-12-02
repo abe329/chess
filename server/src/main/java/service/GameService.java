@@ -8,6 +8,7 @@ import model.AuthData;
 import model.requestsandresults.*;
 // import java.util.UUID;
 
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -100,6 +101,14 @@ public class GameService {
                 throw new ServiceException("Error: bad gameID");
             }
             return game;
+        } catch (DataAccessException e) {
+            throw new ServiceException("Error: " + e.getMessage());
+        }
+    }
+
+    public void updateGame(GameData game) throws ServiceException {
+        try {
+            dataAccess.updateGame(game);
         } catch (DataAccessException e) {
             throw new ServiceException("Error: " + e.getMessage());
         }

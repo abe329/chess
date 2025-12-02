@@ -82,11 +82,11 @@ public class GameplayClient implements Client, MessageHandler {
         var command = tokens[0].toLowerCase();
         return switch (command) {
             case "help" -> ClientStateTransition.stay(help());
-            case "redraw" -> redrawBoard(); // ClientStateTransition.stay(""); }
-            case "leave" -> sendLeave();
-            case "move" -> handleMove(tokens); //ClientStateTransition.stay(""); }
-            case "legal" -> handleLegal(tokens); //ClientStateTransition.stay(""); }
-            case "resign" -> handleResign(); //ClientStateTransition.stay(""); }
+            case "redraw" -> goBackToMenu(); // redrawBoard(); // ClientStateTransition.stay(""); }
+            case "leave" -> goBackToMenu();
+            case "move" -> goBackToMenu(); // handleMove(tokens); //ClientStateTransition.stay(""); }
+            case "legal" -> goBackToMenu(); //handleLegal(tokens); //ClientStateTransition.stay(""); }
+            case "resign" -> goBackToMenu(); //handleResign(); //ClientStateTransition.stay(""); }
             default -> ClientStateTransition.stay("Unknown command. Type 'help'.");
         };
     }

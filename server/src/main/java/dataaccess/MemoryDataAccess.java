@@ -48,6 +48,14 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
+    public void updateGame(GameData game) throws DataAccessException {
+        if (!games.containsKey(game.gameID())) {
+            throw new DataAccessException("bad gameID");
+        }
+        games.put(game.gameID(), game);
+    }
+
+    @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
         return auths.get(authToken);
     }
