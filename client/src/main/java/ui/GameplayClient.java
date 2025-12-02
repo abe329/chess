@@ -4,6 +4,7 @@ import chess.ChessGame;
 import exceptions.ResponseException;
 import websocket.MessageHandler;
 import websocket.WebSocketFacade;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 public class GameplayClient implements Client, MessageHandler {
@@ -23,9 +24,16 @@ public class GameplayClient implements Client, MessageHandler {
         this.ws = new WebSocketFacade(serverUrl.getServerUrl(), this);
 
         try {
-            ChessGame game = getGame();
-            ChessboardRenderer renderer = new ChessboardRenderer(game, color);
-            renderer.displayBoard();
+//            ChessGame game = getGame();
+//            ChessboardRenderer renderer = new ChessboardRenderer(game, color);
+//            renderer.displayBoard();
+            UserGameCommand connect = new UserGameCommand(
+                    UserGameCommand.CommandType.CONNECT,
+                    authToken,
+                    gameID
+            );
+
+            ws.send(connect);
         } catch (Exception e) {
             System.out.println("Error displaying board: " + e.getMessage());
         }
@@ -36,7 +44,7 @@ public class GameplayClient implements Client, MessageHandler {
     @Override
     public void notify(ServerMessage msg) {
         switch(msg.getServerMessageType()) {
-//            case LOAD_GAME -> handleLoadGame(msg);
+//            case LOAD_GAME -> loadGame(msg);
 //            case NOTIFICATION -> handleNotification(msg);
 //            case ERROR -> handleError(msg);
         }
@@ -44,8 +52,36 @@ public class GameplayClient implements Client, MessageHandler {
 
     @Override
     public ClientStateTransition eval(String input) {
-        var previous = new InternalClient(server, authToken, username);
-        return ClientStateTransition.switchTo("Returning to menu...", previous);
+        var tokens = input.trim().split("\\s+");
+        if (tokens.length == 0 || tokens[0].isBlank()) {
+            return ClientStateTransition.stay("Type 'help' for commands.");
+        }
+        var command = tokens[0].toLowerCase();
+        return switch (command) {
+            case "help" -> ClientStateTransition.stay(help());
+            case "redraw" -> redrawBoard(); // ClientStateTransition.stay(""); }
+            case "leave" -> sendLeave();
+            case "move" -> handleMove(tokens); //ClientStateTransition.stay(""); }
+            case "legal" -> handleLegal(tokens); //ClientStateTransition.stay(""); }
+            case "resign" -> handleResign(); //ClientStateTransition.stay(""); }
+            default -> ClientStateTransition.stay("Unknown command. Type 'help'.");
+        };
+    }
+
+    private ClientStateTransition sendLeave() throws ResponseException {
+        UserGameCommand leave = new UserGameCommand(
+                UserGameCommand.CommandType.LEAVE,
+                authToken,
+                gameID
+        );
+        ws.send(leave);
+        ws.close();
+        return goBackToMenu();
+    }
+
+    private ClientStateTransition goBackToMenu() {
+        var internal = new InternalClient(server, authToken, username);
+        return ClientStateTransition.switchTo("Leaving game...", internal);
     }
 
     @Override
