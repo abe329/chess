@@ -202,7 +202,7 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
                         (opponent == WHITE ? game.whiteUsername() : game.blackUsername());
                 NotificationMessage checkNote =
                         new NotificationMessage(inCheckUser + " is in check");
-                broadcastToOthers(cmd.getGameID(), ctx, checkNote);
+                broadcastToAll(cmd.getGameID(), checkNote);
             }
 
 
