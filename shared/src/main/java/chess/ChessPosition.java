@@ -53,7 +53,11 @@ public class ChessPosition {
         return new ChessPosition(row, col);
     }
 
-
+    public String toAlgebraic() {
+        char file = (char) ('a' + (this.col - 1));  // convert 1 → a, 2 → b, etc.
+        char rank = (char) ('0' + this.row);        // convert 1 → '1'
+        return "" + file + rank;
+    }
 
     @Override
     public boolean equals(Object o) {

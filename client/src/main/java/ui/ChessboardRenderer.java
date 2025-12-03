@@ -44,17 +44,13 @@ public class ChessboardRenderer {
         out.print(RESET);
     }
 
-    public void highlight(ChessPosition pos, Collection<ChessMove> moves) {
+    public void highlight(Collection<ChessMove> moves) {
         highlightedSquares.clear();
-
-        // Highlight the starting square
-        highlightedSquares.add(pos);
 
         // Highlight all move destinations
         for (ChessMove m : moves) {
             highlightedSquares.add(m.getEndPosition());
         }
-
         displayBoard();
 
         // Remove highlighting after display (optional)

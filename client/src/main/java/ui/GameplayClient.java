@@ -153,7 +153,7 @@ public class GameplayClient implements Client, MessageHandler {
         var pos = ChessPosition.fromAlgebraic(tokens[0]);
         var moves = currentGame.getGame().validMoves(pos);
 
-        renderer.highlight(pos, moves);
+        renderer.highlight(moves);
 
         return ClientStateTransition.stay("");
     }
@@ -181,11 +181,5 @@ public class GameplayClient implements Client, MessageHandler {
             case "n" -> ChessPiece.PieceType.KNIGHT;
             default -> throw new IllegalArgumentException("Invalid promotion piece: " + token);
         };
-    }
-
-
-    private ChessGame getGame() {
-        // change this part later
-        return new ChessGame();
     }
 }
