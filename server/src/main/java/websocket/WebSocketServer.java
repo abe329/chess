@@ -100,7 +100,7 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             //Authenticate auth token
             String auth = cmd.getAuthToken();
             if (auth == null) {
-                sendError(ctx, "Error: unauthorized");
+                sendError(ctx, "unauthorized");
                 return;
             }
             String username = userService.authenticate(auth);
@@ -108,7 +108,7 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             // Check game
             GameData game = gameService.getGame(cmd.getGameID());
             if (game == null) {
-                sendError(ctx, "Error: bad gameID");
+                sendError(ctx, "bad gameID");
                 return;
             }
 
@@ -194,7 +194,7 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
 
 
         } catch (Exception ex) {
-            sendError(ctx, "Error: " + ex.getMessage());
+            sendError(ctx, ex.getMessage());
         }
     }
 
@@ -203,7 +203,7 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             String username = userService.authenticate(cmd.getAuthToken());
             GameData game = gameService.getGame(cmd.getGameID());
             if (game == null) {
-                sendError(ctx, "Error: bad gameID");
+                sendError(ctx, "bad gameID");
                 return;
             }
 
@@ -229,7 +229,7 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             broadcastToOthers(gameID, ctx, note);
 
         } catch (Exception e) {
-            sendError(ctx, "Error: " + e.getMessage());
+            sendError(ctx, e.getMessage());
         }
     }
 
@@ -238,7 +238,7 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             String username = userService.authenticate(cmd.getAuthToken());
             GameData game = gameService.getGame(cmd.getGameID());
             if (game == null) {
-                sendError(ctx, "Error: bad gameID");
+                sendError(ctx, "bad gameID");
                 return;
             }
             boolean isPlayer =
@@ -270,7 +270,7 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             broadcastToAll(game.gameID(), nm);
 
         } catch (Exception e){
-            sendError(ctx, "Error: " + e.getMessage());
+            sendError(ctx, e.getMessage());
         }
     }
 
