@@ -54,21 +54,6 @@ public class WebSocketFacade extends Endpoint {
         //Endpoint requires this method, but PetShop says I don't have to do anything
     }
 
-//    public void connect(UserGameCommand command) throws ResponseException {
-//        try {
-//            if (session == null || !session.isOpen()) {
-//                throw new ResponseException(
-//                        ResponseException.Code.ServerError,
-//                        "Websocket session is closed."
-//                );
-//            }
-//            String json = gson.toJson(command);
-//            session.getBasicRemote().sendText(json);
-//        } catch (IOException e) {
-//               throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
-//        }
-//    }
-
     public void send(UserGameCommand command) throws ResponseException {
         try {
             if (session == null || !session.isOpen()) {
@@ -92,22 +77,5 @@ public class WebSocketFacade extends Endpoint {
             }
         } catch (IOException ignored) {}
     }
-//    public void enterPetShop(String visitorName) throws ResponseException {
-//        try {
-//            var action = new Action(Action.Type.ENTER, visitorName);
-//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-//        } catch (IOException ex) {
-//            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-//        }
-//    }
-//
-//    public void leavePetShop(String visitorName) throws ResponseException {
-//        try {
-//            var action = new Action(Action.Type.EXIT, visitorName);
-//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-//        } catch (IOException ex) {
-//            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-//        }
-//    }
 
 }

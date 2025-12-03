@@ -30,7 +30,7 @@ public class Server {
 
         var userService = new UserService(dataAccess);
         var gameService = new GameService(dataAccess);
-        var WebSocketServer = new WebSocketServer(userService, gameService);
+        var webSocketServer = new WebSocketServer(userService, gameService);
 
 
         javalin.delete("/db", adminHandler::clear);
@@ -41,9 +41,9 @@ public class Server {
         javalin.get("/game", gameHandler::listGames);
         javalin.put("/game", gameHandler::joinGame);
         javalin.ws("/ws", ws -> {
-            ws.onConnect(WebSocketServer);
-            ws.onMessage(WebSocketServer);
-            ws.onClose(WebSocketServer);
+            ws.onConnect(webSocketServer);
+            ws.onMessage(webSocketServer);
+            ws.onClose(webSocketServer);
         });
 
     }
