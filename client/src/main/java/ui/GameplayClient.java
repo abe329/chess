@@ -19,7 +19,7 @@ public class GameplayClient implements Client, MessageHandler {
     private final String color;
     private final WebSocketFacade ws;
     private ChessboardRenderer renderer;
-    private GameData currentGame;  // whatever server sends as game
+    private GameData currentGame;
 
 
     public GameplayClient(ServerFacade serverUrl, String authToken, String username, Integer gameID, String color) throws ResponseException {
@@ -31,16 +31,13 @@ public class GameplayClient implements Client, MessageHandler {
         this.ws = new WebSocketFacade(serverUrl.getServerUrl(), this);
 
         try {
-//            ChessGame game = getGame();
-//            ChessboardRenderer renderer = new ChessboardRenderer(game, color);
-//            renderer.displayBoard();
             UserGameCommand connect = new UserGameCommand(
                     UserGameCommand.CommandType.CONNECT,
                     authToken,
                     gameID
             );
 
-            ws.send(connect); // IS THIS RIGHT??
+            ws.send(connect);
         } catch (Exception e) {
             System.out.println("Error displaying board: " + e.getMessage());
         }
