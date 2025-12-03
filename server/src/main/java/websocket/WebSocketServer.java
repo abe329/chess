@@ -4,6 +4,7 @@ import chess.ChessGame;
 import chess.ChessMove;
 import io.javalin.websocket.*;
 import model.GameData;
+import org.jetbrains.annotations.NotNull;
 import service.GameService;
 import service.UserService;
 import websocket.commands.*;
@@ -46,7 +47,7 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
     }
 
     @Override
-    public void handleClose(WsCloseContext ctx) {
+    public void handleClose(@NotNull WsCloseContext ctx) {
         connections.removeConnection(ctx);
         System.out.println("Websocket closed");
     }
@@ -167,16 +168,28 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             // Check for checkmate first
             boolean whiteCM = chess.isInCheckmate(WHITE);
             boolean blackCM = chess.isInCheckmate(BLACK);
+            boolean whiteSM = chess.isInStalemate(WHITE);
+            boolean blackSM = chess.isInStalemate(BLACK);
 
+            // Checkmate
             if (whiteCM || blackCM) {
                 chess.setGameOver(true);
-
                 gameService.updateGame(updated); //MAYBE change this later
 
                 String loserName = whiteCM ? game.whiteUsername() : game.blackUsername();
                 NotificationMessage cmNote = new NotificationMessage(loserName + " is checkmated");
                 broadcastToAll(cmd.getGameID(), cmNote);
 
+                return;
+            }
+            // Stalemate
+            if (whiteSM || blackSM) {
+                chess.setGameOver(true);
+                gameService.updateGame(updated);
+
+                NotificationMessage smNote =
+                        new NotificationMessage("Game is a stalemate");
+                broadcastToAll(cmd.getGameID(), smNote);
                 return;
             }
 
