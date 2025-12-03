@@ -84,6 +84,7 @@ public class GameplayClient implements Client, MessageHandler {
         try {
             return switch (command) {
                 case "help" -> ClientStateTransition.stay(help());
+                case "promote" -> ClientStateTransition.stay(promotionHelp());
                 case "redraw" -> {
                     if (renderer != null) { renderer.displayBoard(); }
                     yield ClientStateTransition.stay("");
@@ -113,6 +114,14 @@ public class GameplayClient implements Client, MessageHandler {
     }
 
     private ClientStateTransition sendResign() throws ResponseException {
+        String cont = prompt("Are you sure you want to resign? (yes/no)  ");
+        var ans = cont.toLowerCase();
+        switch (ans) {
+            case "yes": break; // go to the code below and finish resigning
+            case "no": return ClientStateTransition.stay("Game resumed."); // go back to main menu
+            default: return ClientStateTransition.stay("Unknown command."); // if they don't enter yes or no
+        }
+
         UserGameCommand resign = new UserGameCommand(
                 UserGameCommand.CommandType.RESIGN,
                 authToken,
@@ -159,12 +168,24 @@ public class GameplayClient implements Client, MessageHandler {
     public String help() {
         return """
             Commands:
-                move <FROM> <TO> [PROMOTION - optional] 
+                move <FROM> <TO> [PROMOTION - optional]
                 resign
                 leave
                 redraw
                 highlight <PIECE POSITION>
                 help
+                promote (Explains how to promote a pawn)
+            """;
+    }
+
+    public String promotionHelp() {
+        return """   
+            To promote a pawn:
+            Type "move <from position> <to position> <promotion>"
+                Queen: 'q'
+                Rook: 'r'
+                Bishop: 'b'
+                Knight: 'k'
             """;
     }
 
@@ -175,8 +196,12 @@ public class GameplayClient implements Client, MessageHandler {
             case "q" -> ChessPiece.PieceType.QUEEN;
             case "r" -> ChessPiece.PieceType.ROOK;
             case "b" -> ChessPiece.PieceType.BISHOP;
-            case "n" -> ChessPiece.PieceType.KNIGHT;
+            case "k" -> ChessPiece.PieceType.KNIGHT;
             default -> throw new IllegalArgumentException("Invalid promotion piece: " + token);
         };
+    }
+    private String prompt(String msg) {
+        System.out.print(msg);
+        return new java.util.Scanner(System.in).nextLine();
     }
 }
