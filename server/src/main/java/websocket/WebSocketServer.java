@@ -2,13 +2,9 @@ package websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
-import chess.InvalidMoveException;
-import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
-import model.AuthData;
 import model.GameData;
 import service.GameService;
-import service.ServiceException;
 import service.UserService;
 import websocket.commands.*;
 import com.google.gson.Gson;
@@ -51,6 +47,7 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
 
     @Override
     public void handleClose(WsCloseContext ctx) {
+        connections.removeConnection(ctx);
         System.out.println("Websocket closed");
     }
 
@@ -154,23 +151,33 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             broadcastToAll(cmd.getGameID(), loadMsg);
 
             // Send notification to others
-            NotificationMessage note = new NotificationMessage(
-                    username + " moved " + move.toString()
-            );
+            NotificationMessage note = new NotificationMessage(username + " moved " + move);
             broadcastToOthers(cmd.getGameID(), ctx, note);
 
-            // Check/mate notifications
-            if (chess.isInCheck(whoseTurn == WHITE ? BLACK : WHITE)) {
-                String msg = (whoseTurn == WHITE ? game.blackUsername() : game.whiteUsername()) + " is in check";
-                NotificationMessage checkNote = new NotificationMessage(msg);
-                broadcastToOthers(cmd.getGameID(), ctx, checkNote); //MAYBE CHANGE THIS
+            // Check for checkmate first
+            boolean whiteCM = chess.isInCheckmate(WHITE);
+            boolean blackCM = chess.isInCheckmate(BLACK);
+
+            if (whiteCM || blackCM) {
+                String loser = whiteCM ? game.whiteUsername() : game.blackUsername();
+                NotificationMessage cm = new NotificationMessage(loser + " is checkmated");
+                broadcastToOthers(cmd.getGameID(), ctx, cm);
+                chess.setGameOver(true);
+                return;
             }
 
-            if (chess.isInCheckmate(WHITE) || chess.isInCheckmate(BLACK)) {
-                String loser = chess.isInCheckmate(WHITE) ? game.whiteUsername() : game.blackUsername();
-                NotificationMessage cm = new NotificationMessage(loser + " is checkmated");
-                broadcastToOthers(cmd.getGameID(), ctx, cm); // MAYBE CHANGE THIS
+            // Look for check
+            ChessGame.TeamColor opponent =
+                    (whoseTurn == WHITE ? BLACK : WHITE);
+
+            if (chess.isInCheck(opponent)) {
+                String inCheckUser =
+                        (opponent == WHITE ? game.whiteUsername() : game.blackUsername());
+                NotificationMessage checkNote =
+                        new NotificationMessage(inCheckUser + " is in check");
+                broadcastToOthers(cmd.getGameID(), ctx, checkNote);
             }
+
 
         } catch (Exception ex) {
             sendError(ctx, "Error: " + ex.getMessage());
@@ -187,6 +194,21 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             }
 
             int gameID = cmd.getGameID();
+
+            String white = game.whiteUsername();
+            String black = game.blackUsername();
+
+            if (username.equals(white)) { white = null; }
+            if (username.equals(black)) { black = null; }
+
+            GameData updated = new GameData(
+                    game.gameID(),
+                    white,
+                    black,
+                    game.gameName(),
+                    game.game()
+            );
+            gameService.updateGame(updated);
 
             connections.removeConnection(ctx);
             NotificationMessage note = new NotificationMessage(username + " left the game");
@@ -215,6 +237,11 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
             }
 
             ChessGame chess = game.game();
+            if (chess.isGameOver()) {
+                sendError(ctx, "Error: game is already over.");
+                return;
+            }
+
             chess.setGameOver(true);
             GameData updated = new GameData(
                     game.gameID(),
@@ -237,8 +264,15 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
         var json = gson.toJson(msg);
 
         for (WsContext c : connections.getConnections(gameID)) {
-            if (c != exclude) {
+            try {
+                if (c.session.equals(exclude.session)) continue;
+                if (!c.session.isOpen()) {
+                    connections.removeConnection(c);
+                    continue;
+                }
                 c.send(json);
+            } catch (Exception ex) {
+                connections.removeConnection(c);
             }
         }
     }
@@ -253,7 +287,6 @@ public class WebSocketServer implements WsConnectHandler, WsMessageHandler, WsCl
     private String moveToString(ChessMove move) {
         return move.getStartPosition() + " → " + move.getEndPosition();
     }
-
 
     private void sendError(WsContext ctx, String message) {
         ErrorMessage err = new ErrorMessage(message);

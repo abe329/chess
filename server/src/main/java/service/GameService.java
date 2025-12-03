@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import dataaccess.DataAccessException;
@@ -31,7 +32,7 @@ public class GameService {
             AuthData auth = dataAccess.getAuth(request.authToken());
             if (auth == null) { throw new ServiceException("Error: unauthorized"); }
 
-            GameData game = new GameData(null, null, null, request.gameName(), null);
+            GameData game = new GameData(null, null, null, request.gameName(), new ChessGame());
             GameData created = dataAccess.createGame(game);  // use returned object from DB
             return new CreateGameResult(created.gameID());
         } catch (DataAccessException e) {
