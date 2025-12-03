@@ -1,12 +1,15 @@
 package ui;
 
-import chess.ChessGame;
+import chess.*;
 import exceptions.ResponseException;
 import model.GameData;
 import websocket.MessageHandler;
 import websocket.WebSocketFacade;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
+
+import java.util.Arrays;
 
 public class GameplayClient implements Client, MessageHandler {
     private final ServerFacade server;
@@ -80,15 +83,23 @@ public class GameplayClient implements Client, MessageHandler {
             return ClientStateTransition.stay("Type 'help' for commands.");
         }
         var command = tokens[0].toLowerCase();
-        return switch (command) {
-            case "help" -> ClientStateTransition.stay(help());
-            case "redraw" -> goBackToMenu(); // redrawBoard(); // ClientStateTransition.stay(""); }
-            case "leave" -> goBackToMenu();
-            case "move" -> goBackToMenu(); // handleMove(tokens); //ClientStateTransition.stay(""); }
-            case "legal" -> goBackToMenu(); //handleLegal(tokens); //ClientStateTransition.stay(""); }
-            case "resign" -> goBackToMenu(); //handleResign(); //ClientStateTransition.stay(""); }
-            default -> ClientStateTransition.stay("Unknown command. Type 'help'.");
-        };
+        var params = Arrays.copyOfRange(tokens, 1, tokens.length);
+        try {
+            return switch (command) {
+                case "help" -> ClientStateTransition.stay(help());
+                case "redraw" -> {
+                    if (renderer != null) { renderer.displayBoard(); }
+                    yield ClientStateTransition.stay("");
+                }
+                case "leave" -> sendLeave();
+                case "move" -> handleMove(params);
+                case "highlight" -> handleHighlight(params);
+                case "resign" -> sendResign();
+                default -> ClientStateTransition.stay("Unknown command. Type 'help'.");
+            };
+        } catch (ResponseException e) {
+            return ClientStateTransition.stay("Unknown command. Type 'help'.");
+        }
     }
 
     private ClientStateTransition sendLeave() throws ResponseException {
@@ -99,26 +110,79 @@ public class GameplayClient implements Client, MessageHandler {
         );
         ws.send(leave);
         ws.close();
-        return goBackToMenu();
-    }
 
-    private ClientStateTransition goBackToMenu() {
         var internal = new InternalClient(server, authToken, username);
         return ClientStateTransition.switchTo("Leaving game...", internal);
+    }
+
+    private ClientStateTransition sendResign() throws ResponseException {
+        UserGameCommand resign = new UserGameCommand(
+                UserGameCommand.CommandType.RESIGN,
+                authToken,
+                gameID
+        );
+        ws.send(resign);
+        return ClientStateTransition.stay("You resigned the game.");
+    }
+
+    private ClientStateTransition handleMove(String[] tokens) throws ResponseException {if (tokens.length < 2) {
+            return ClientStateTransition.stay("Usage: move <FROM> <TO> [PROMOTION - optional]");
+        }
+        var from = ChessPosition.fromAlgebraic(tokens[0]);
+        var to = ChessPosition.fromAlgebraic(tokens[1]);
+
+        ChessPiece.PieceType promotion = null;
+        if (tokens.length == 3) {
+            promotion = parsePromotionPiece(tokens[2]);
+        }
+
+        ChessMove move = new ChessMove(from, to, promotion);
+        MakeMoveCommand makeMove = new MakeMoveCommand(
+                authToken,
+                gameID,
+                move
+        );
+        ws.send(makeMove);
+        return ClientStateTransition.stay("");
+    }
+
+    private ClientStateTransition handleHighlight(String[] tokens) throws ResponseException {
+        if (tokens.length != 1) {
+            return ClientStateTransition.stay("Usage: highlight <PIECE POSITION");
+        }
+        var pos = ChessPosition.fromAlgebraic(tokens[0]);
+        var moves = currentGame.getGame().validMoves(pos);
+
+        renderer.highlight(pos, moves);
+
+        return ClientStateTransition.stay("");
     }
 
     @Override
     public String help() {
         return """
             Commands:
-                move <START POSITION> <END POSITION>
+                move <FROM> <TO> [PROMOTION - optional] 
                 resign
                 leave
                 redraw
-                legal <PIECE POSITION>
+                highlight <PIECE POSITION>
                 help
             """;
     }
+
+    private ChessPiece.PieceType parsePromotionPiece(String token) {
+        token = token.toLowerCase();
+
+        return switch (token) {
+            case "q" -> ChessPiece.PieceType.QUEEN;
+            case "r" -> ChessPiece.PieceType.ROOK;
+            case "b" -> ChessPiece.PieceType.BISHOP;
+            case "n" -> ChessPiece.PieceType.KNIGHT;
+            default -> throw new IllegalArgumentException("Invalid promotion piece: " + token);
+        };
+    }
+
 
     private ChessGame getGame() {
         // change this part later

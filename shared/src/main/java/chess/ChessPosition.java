@@ -39,6 +39,22 @@ public class ChessPosition {
         return String.format("[%d,%d]", row, col);
     }
 
+    public static ChessPosition fromAlgebraic(String algebraic) {
+        if (algebraic == null || algebraic.length() != 2) {
+            throw new IllegalArgumentException("Invalid position: " + algebraic);
+        }
+
+        char file = algebraic.toLowerCase().charAt(0);
+        char rank = algebraic.charAt(1);
+
+        int col = file - 'a' + 1;
+        int row = rank - '0';
+
+        return new ChessPosition(row, col);
+    }
+
+
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

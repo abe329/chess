@@ -1,11 +1,15 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static chess.ChessGame.TeamColor.WHITE;
 import static ui.EscapeSequences.*;
@@ -14,6 +18,8 @@ public class ChessboardRenderer {
     private final ChessGame game;
     private final boolean whitePerspective;
     private static final String[] LETTERS = {"a", "b", "c", "d", "e", "f", "g", "h"};
+    private final Set<ChessPosition> highlightedSquares = new HashSet<>();
+
 
     public ChessboardRenderer(ChessGame game, String playerColor) {
         this.game = game;
@@ -36,6 +42,24 @@ public class ChessboardRenderer {
 
         drawHeaders(out);
         out.print(RESET);
+    }
+
+    public void highlight(ChessPosition pos, Collection<ChessMove> moves) {
+        highlightedSquares.clear();
+
+        // Highlight the starting square
+        highlightedSquares.add(pos);
+
+        // Highlight all move destinations
+        for (ChessMove m : moves) {
+            highlightedSquares.add(m.getEndPosition());
+        }
+
+        displayBoard();
+
+        // Remove highlighting after display (optional)
+        highlightedSquares.clear();
+
     }
 
     private void drawHeaders(PrintStream out) {
@@ -71,9 +95,15 @@ public class ChessboardRenderer {
     }
 
     private void drawSquare(PrintStream out, int row, int col) {
-        boolean darkSquare = (row + col) % 2 == 0;
-        String bg = darkSquare ? SET_BG_COLOR_DARK_BROWN : SET_BG_COLOR_LIGHT_BROWN;
-        out.print(bg);
+        ChessPosition position = new ChessPosition(row, col);
+
+        if (highlightedSquares.contains(position)) {
+            out.print(SET_BG_COLOR_BLUE);
+        } else {
+            boolean darkSquare = (row + col) % 2 == 0;
+            String bg = darkSquare ? SET_BG_COLOR_DARK_BROWN : SET_BG_COLOR_LIGHT_BROWN;
+            out.print(bg);
+        }
 
         ChessPosition pos = new ChessPosition(row, col);
         ChessPiece piece = game.getBoard().getPiece(pos);

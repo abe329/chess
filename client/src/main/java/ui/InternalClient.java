@@ -1,5 +1,6 @@
 package ui;
 
+import exceptions.ResponseException;
 import model.requestsandresults.CreateGameRequest;
 import model.requestsandresults.*;
 
@@ -29,7 +30,7 @@ public class InternalClient implements Client {
             case "logout" -> logout();
             case "help" -> ClientStateTransition.stay(help());
             case "quit" -> ClientStateTransition.quit("Adios good friend!");
-            default -> ClientStateTransition.stay("Unknown command. Type help.");
+            default -> ClientStateTransition.stay("Unknown command. Type 'help'.");
         };
     }
 
@@ -79,8 +80,12 @@ public class InternalClient implements Client {
         }
 
         server.joinGame(authToken, new JoinGameRequest(playerColor, gameID));
-        var next = new GameplayClient(server, authToken, username, gameID, playerColor);
-        return ClientStateTransition.switchTo("Joined game " + gameID + " as " + playerColor, next);
+        try {
+            var next = new GameplayClient(server, authToken, username, gameID, playerColor);
+            return ClientStateTransition.switchTo("Joined game " + gameID + " as " + playerColor, next);
+        } catch (ResponseException e) {
+            throw new ClientException(e.getMessage());
+        }
     }
 
     private ClientStateTransition observe(String[] tokens) throws ClientException {
@@ -102,9 +107,12 @@ public class InternalClient implements Client {
         if (!exists) {
             return ClientStateTransition.stay("Game " + gameID + " does not exist.");
         }
-
-        var next = new GameplayClient(server, authToken, username, gameID, "WHITE");
-        return ClientStateTransition.switchTo("Observing game " + gameID, next);
+        try {
+            var next = new GameplayClient(server, authToken, username, gameID, "WHITE");
+            return ClientStateTransition.switchTo("Observing game " + gameID, next);
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private ClientStateTransition logout() throws ClientException {
